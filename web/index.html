@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>科研工具集 - 研究生/博士生必备工具箱</title>
+    <meta name="description" content="免费在线科研工具箱：文本去空格、科学计数法转换、单位换算、繁简转换、字符计数等">
+    <link rel="stylesheet" href="css/style.css">
+    <!-- 广告位：顶部 -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-YOUR_AD_CLIENT" crossorigin="anonymous"></script>
+</head>
+<body>
+    <!-- 顶部广告位 -->
+    <div class="top-ad">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-YOUR_AD_CLIENT"
+             data-ad-slot="YOUR_AD_SLOT"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+             (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
+
+    <header>
+        <div class="container">
+            <h1>🔬 科研工具集</h1>
+            <p class="subtitle">研究生、博士生必备的在线科研工具箱</p>
+            <div class="badges">
+                <span class="badge">🆓 免费使用</span>
+                <span class="badge">⚡ 无需安装</span>
+                <span class="badge">📱 随时可用</span>
+            </div>
+        </div>
+    </header>
+
+    <nav class="tool-nav">
+        <div class="container">
+            <ul id="toolList">
+                <li><a href="#trim" class="active" data-tool="trim">📝 文本去空格</a></li>
+                <li><a href="#sci" data-tool="sci">🔢 科学计数法</a></li>
+                <li><a href="#unit" data-tool="unit">⚖️ 单位换算</a></li>
+                <li><a href="#s2t" data-tool="s2t">繁简转换</a></li>
+                <li><a href="#random" data-tool="random">🎲 随机数</a></li>
+                <li><a href="#count" data-tool="count">📊 字符计数</a></li>
+                <li><a href="#line" data-tool="line">🔢 行号处理</a></li>
+                <li><a href="#sort" data-tool="sort">↕️ 文本排序</a></li>
+                <li><a href="#json" data-tool="json">{} JSON格式化</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- 工具1: 文本去空格 -->
+        <section id="trim" class="tool-section active">
+            <h2>📝 文本去空格工具</h2>
+                    <div class="options">
+                <label><input type="checkbox" id="trim-space" checked> 去除空格</label>
+                <label><input type="checkbox" id="trim-newline" checked> 去除换行</label>
+                <label><input type="checkbox" id="trim-tab" checked> 去除制表符</label>
+                <label><input type="checkbox" id="trim-extra" checked> 去除多余空格</label>
+            </div>
+            <div class="io-area">
+                <div class="input-box">
+                    <label>输入文本</label>
+                    <textarea id="trim-input" placeholder="请输入需要处理的文本..."></textarea>
+                </div>
+                <div class="output-box">
+                    <label>输出结果</label>
+                    <textarea id="trim-output" readonly placeholder="处理结果将显示在这里"></textarea>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn-primary" onclick="trimText()">开始转换 →</button>
+                <button class="btn-secondary" onclick="copyResult('trim-output')">复制结果</button>
+                <button class="btn-secondary" onclick="clearText('trim')">清空</button>
+            </div>
+        </section>
+
+        <!-- 工具2: 科学计数法转换 -->
+        <section id="sci" class="tool-section">
+            <h2>🔢 科学计数法转换</h2>
+            <div class="options">
+                <label>小数位数: 
+                    <select id="sci-precision">
+                        <option value="4">4位</option>
+                        <option value="6">6位</option>
+                        <option value="8">8位</option>
+                        <option value="10" selected>10位</option>
+                    </select>
+                </label>
+            </div>
+            <div class="io-area">
+                <div class="input-box">
+                    <label>输入</label>
+                    <textarea id="sci-input" placeholder="输入科学计数法或普通数字，如: 1.23e-5 或 0.0000123"></textarea>
+                </div>
+                <div class="output-box">
+                    <label>输出</label>
+                    <textarea id="sci-output" readonly></textarea>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn-primary" onclick="sciToDecimal()">转为普通数字</button>
+                <button class="btn-primary" onclick="decimalToSci()">转为科学计数法</button>
+                <button class="btn-secondary" onclick="copyResult('sci-output')">复制结果</button>
+                <button class="btn-secondary" onclick="clearText('sci')">清空</button>
+            </div>
+        </section>
+
+        <!-- 工具3: 单位换算 -->
+        <section id="unit" class="tool-section">
+            <h2>⚖️ 单位换算工具</h2>
+            <div class="unit-converter">
+                <div class="unit-row">
+                    <select id="unit-category" onchange="updateUnitOptions()">
+                        <option value="length">长度</option>
+                        <option value="weight">重量</option>
+                        <option value="temperature">温度</option>
+                        <option value="area">面积</option>
+                        <option value="volume">体积</option>
+                        <option value="pressure">压力</option>
+                        <option value="energy">能量</option>
+                        <option value="power">功率</option>
+                        <option value="time">时间</option>
+                    </select>
+                </div>
+                <div class="unit-row">
+                    <div class="unit-col">
+                        <label>从</label>
+                        <select id="unit-from"></select>
+                        <input type="number" id="unit-input" placeholder="输入数值" oninput="convertUnit()">
+                    </div>
+                    <span class="arrow">→</span>
+                    <div class="unit-col">
+                        <label>到</label>
+                        <select id="unit-to" onchange="convertUnit()"></select>
+                        <input type="text" id="unit-output" readonly placeholder="结果">
+                    </div>
+                </div>
+                <button class="btn-secondary" onclick="swapUnit()">交换单位</button>
+                <button class="btn-secondary" onclick="copyResult('unit-output')">复制结果</button>
+            </div>
+        </section>
+
+        <!-- 工具4: 繁简转换 -->
+        <section id="s2t" class="tool-section">
+            <h2>繁简转换工具</h2>
+            <div class="options">
+                <label><input type="radio" name="s2t-mode" value="s2t" checked> 简体→繁体</label>
+                <label><input type="radio" name="s2t-mode" value="t2s"> 繁体→简体</label>
+                <label><input type="radio" name="s2t-mode" value="s2hk"> 简体→香港</label>
+                <label><input type="radio" name="s2t-mode" value="s2tw"> 简体→台湾</label>
+            </div>
+            <div class="io-area">
+                <div class="input-box">
+                    <label>输入文本</label>
+                    <textarea id="s2t-input" placeholder="请输入文本..."></textarea>
+                </div>
+                <div class="output-box">
+                    <label>输出结果</label>
+                    <textarea id="s2t-output" readonly></textarea>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn-primary" onclick="convertS2T()">开始转换 →</button>
+                <button class="btn-secondary" onclick="copyResult('s2t-output')">复制结果</button>
+                <button class="btn-secondary" onclick="clearText('s2t')">清空</button>
+            </div>
+        </section>
+
+        <!-- 工具5: 随机数生成 -->
+        <section id="random" class="tool-section">
+            <h2>🎲 随机数生成工具</h2>
+            <div class="random-options">
+                <div class="random-row">
+                    <label>最小值: <input type="number" id="random-min" value="1"></label>
+                    <label>最大值: <input type="number" id="random-max" value="100"></label>
+                    <label>生成个数: <input type="number" id="random-count" value="10"></label>
+                </div>
+                <div class="random-row">
+                    <label>小数位数: 
+                        <select id="random-decimal">
+                            <option value="0" selected>整数</option>
+                            <option value="1">1位</option>
+                            <option value="2">2位</option>
+                            <option value="3">3位</option>
+                        </select>
+                    </label>
+                    <label><input type="checkbox" id="random-unique"> 不重复</label>
+                </div>
+                <div class="random-row">
+                    <label>排序: 
+                        <select id="random-sort">
+                            <option value="none">不排序</option>
+                            <option value="asc">升序</option>
+                            <option value="desc">降序</option>
+                        </select>
+                    </label>
+                    <label>分隔符: 
+                        <select id="random-sep">
+                            <option value="newline">换行</option>
+                            <option value="comma">逗号</option>
+                            <option value="space">空格</option>
+                        </select>
+                    </label>
+                </div>
+            </div>
+            <div class="io-area">
+                <div class="output-box full">
+                    <label>输出结果</label>
+                    <textarea id="random-output" readonly placeholder="点击生成按钮获取随机数"></textarea>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn-primary" onclick="generateRandom()">生成随机数</button>
+                <button class="btn-secondary" onclick="copyResult('random-output')">复制结果</button>
+            </div>
+        </section>
+
+        <!-- 工具6: 字符计数 -->
+        <section id="count" class="tool-section">
+            <h2>📊 字符计数工具</h2>
+            <div class="io-area">
+                <div class="input-box">
+                    <label>输入文本 <span class="auto-count">(实时统计)</span></label>
+                    <textarea id="count-input" placeholder="请输入文本..." oninput="countChars()"></textarea>
+                </div>
+            </div>
+            <div class="count-results">
+                <div class="count-item">
+                    <span class="count-label">总字符数</span>
+                    <span class="count-value" id="count-total">0</span>
+                </div>
+                <div class="count-item">
+                    <span class="count-label">中文字符</span>
+                    <span class="count-value" id="count-cn">0</span>
+                </div>
+                <div class="count-item">
+                    <span class="count-label">英文字母</span>
+                    <span class="count-value" id="count-en">0</span>
+                </div>
+                <div class="count-item">
+                    <span class="count-label">数字</span>
+                    <span class="count-value" id="count-num">0</span>
+                </div>
+                <div class="count-item">
+                    <span class="count-label">空格</span>
+                    <span class="count-value" id="count-space">0</span>
+                </div>
+                <div class="count-item">
+                    <span class="count-label">标点符号</span>
+                    <span class="count-value" id="count-punct">0</span>
+                </div>
+                <div class="count-item">
+                    <span class="count-label">单词数</span>
+                    <span class="count-value" id="count-words">0</span>
+                </div>
+                <div class="count-item">
+                    <span class="count-label">行数</span>
+                    <span class="count-value" id="count-lines">0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 工具7: 行号处理 -->
+        <section id="line" class="tool-section">
+            <h2>🔢 行号处理工具</h2>
+            <div class="options">
+                <label><input type="radio" name="line-mode" value="add" checked> 添加行号</label>
+                <label><input type="radio" name="line-mode" value="remove"> 去除行号</label>
+            </div>
+            <div class="line-options" id="line-add-options">
+                <label>起始编号: <input type="number" id="line-start" value="1"></label>
+                <label>编号宽度: <input type="number" id="line-width" value="4"></label>
+                <label>分隔符: 
+                    <select id="line-sep">
+                        <option value=": ">001: </option>
+                        <option value=" - ">001 - </option>
+                        <option value=". ">001. </option>
+                        <option value=" ">001 </option>
+                    </select>
+                </label>
+            </div>
+            <div class="io-area">
+                <div class="input-box">
+                    <label>输入文本</label>
+                    <textarea id="line-input" placeholder="请输入文本..."></textarea>
+                </div>
+                <div class="output-box">
+                    <label>输出结果</label>
+                    <textarea id="line-output" readonly></textarea>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn-primary" onclick="processLine()">开始处理 →</button>
+                <button class="btn-secondary" onclick="copyResult('line-output')">复制结果</button>
+                <button class="btn-secondary" onclick="clearText('line')">清空</button>
+            </div>
+        </section>
+
+        <!-- 工具8: 文本排序 -->
+        <section id="sort" class="tool-section">
+            <h2>↕️ 文本排序工具</h2>
+            <div class="options">
+                <label>排序方式: 
+                    <select id="sort-type">
+                        <option value="alpha">字母排序</option>
+                        <option value="numeric">数字排序</option>
+                        <option value="length">按行长度</option>
+                    </select>
+                </label>
+                <label>排序方向: 
+                    <select id="sort-order">
+                        <option value="asc">升序</option>
+                        <option value="desc">降序</option>
+                        <option value="random">随机</option>
+                    </select>
+                </label>
+            </div>
+            <div class="options">
+                <label><input type="checkbox" id="sort-unique"> 去除重复</label>
+                <label><input type="checkbox" id="sort-ignore"> 忽略大小写</label>
+                <label><input type="checkbox" id="sort-empty"> 去除空行</label>
+            </div>
+            <div class="io-area">
+                <div class="input-box">
+                    <label>输入文本</label>
+                    <textarea id="sort-input" placeholder="请输入文本，每行一项..."></textarea>
+                </div>
+                <div class="output-box">
+                    <label>输出结果</label>
+                    <textarea id="sort-output" readonly></textarea>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn-primary" onclick="sortText()">开始排序 →</button>
+                <button class="btn-secondary" onclick="copyResult('sort-output')">复制结果</button>
+                <button class="btn-secondary" onclick="clearText('sort')">清空</button>
+            </div>
+        </section>
+
+        <!-- 工具9: JSON格式化 -->
+        <section id="json" class="tool-section">
+            <h2>{} JSON格式化工具</h2>
+            <div class="options">
+                <label>缩进: 
+                    <select id="json-indent">
+                        <option value="2">2空格</option>
+                        <option value="4" selected>4空格</option>
+                        <option value="tab">Tab</option>
+                    </select>
+                </label>
+            </div>
+            <div class="io-area">
+                <div class="input-box">
+                    <label>输入 JSON</label>
+                    <textarea id="json-input" placeholder='{"name": "test", "value": 123}'></textarea>
+                </div>
+                <div class="output-box">
+                    <label>输出结果</label>
+                    <textarea id="json-output" readonly></textarea>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn-primary" onclick="formatJson()">格式化 ↑</button>
+                <button class="btn-primary" onclick="minifyJson()">压缩 ↓</button>
+                <button class="btn-secondary" onclick="validateJson()">校验</button>
+                <button class="btn-secondary" onclick="copyResult('json-output')">复制结果</button>
+                <button class="btn-secondary" onclick="clearText('json')">清空</button>
+            </div>
+            <div class="json-status" id="json-status"></div>
+        </section>
+    </main>
+
+    <!-- 侧边广告位 -->
+    <aside class="sidebar-ad">
+        <ins class="adsbygoogle"
+             style="display:block; width:160px; height:600px"
+             data-ad-client="ca-pub-YOUR_AD_CLIENT"
+             data-ad-slot="YOUR_AD_SLOT"
+             data-ad-format="vertical"></ins>
+    </aside>
+
+    <footer>
+        <div class="container">
+            <p>© 2025 科研工具集 | 让科研更高效</p>
+            <p class="footer-links">
+                <a href="https://github.com/your-repo" target="_blank">GitHub</a> | 
+                <a href="#">使用帮助</a> | 
+                <a href="#">反馈建议</a>
+            </p>
+            <!-- 底部广告位 -->
+            <div class="bottom-ad">
+                <ins class="adsbygoogle"
+                     style="display:block; width:728px; height:90px"
+                     data-ad-client="ca-pub-YOUR_AD_CLIENT"
+                     data-ad-slot="YOUR_AD_SLOT"
+                     data-ad-format="horizontal"></ins>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/tools.js"></script>
+</body>
+</html>
