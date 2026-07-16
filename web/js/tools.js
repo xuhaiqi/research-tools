@@ -3,7 +3,9 @@
 // ==================== 导航功能 ====================
 document.addEventListener('DOMContentLoaded', function() {
     // 工具导航点击
-    const toolLinks = document.querySelectorAll('#toolList a');
+    // Only intercept in-page tool tabs. Links to separate pages, such as
+    // cfd.html, must keep their normal browser navigation behavior.
+    const toolLinks = document.querySelectorAll('#toolList a[href^="#"][data-tool]');
     const toolSections = document.querySelectorAll('.tool-section');
     
     toolLinks.forEach(link => {
