@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CFD参数计算器集 | 空气动力学仿真工具</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #e4e4e4;
+        }
+        
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+        }
+        
+        h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #ff6b6b, #feca57);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle { color: #888; font-size: 1em; }
+        
+        /* 标签页 */
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding: 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+        }
+        
+        .tab-btn {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: #aaa;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn:hover { background: rgba(255,107,107,0.2); }
+        
+        .tab-btn.active {
+            background: linear-gradient(90deg, #ff6b6b, #feca57);
+            border-color: #ff6b6b;
+            color: #1a1a2e;
+            font-weight: 600;
+        }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .card h2 {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #ff6b6b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #aaa;
+            font-size: 0.9em;
+        }
+        
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            font-size: 1em;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #ff6b6b;
+        }
+        
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        button.calc-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(90deg, #ff6b6b, #feca57);
+            border: none;
+            border-radius: 8px;
+            color: #1a1a2e;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        button.calc-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255,107,107,0.3);
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+        }
+        
+        .result-item {
+            background: rgba(0,0,0,0.3);
+            padding: 14px;
+            border-radius: 10px;
+            border-left: 3px solid #ff6b6b;
+        }
+        
+        .result-item.highlight {
+            border-left-color: #feca57;
+            background: rgba(254,202,87,0.1);
+        }
+        
+        .result-item.info { border-left-color: #48dbfb; }
+        
+        .result-label {
+            font-size: 0.8em;
+            color: #888;
+            margin-bottom: 4px;
+        }
+        
+        .result-value {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #fff;
+        }
+        
+        .result-unit {
+            font-size: 0.8em;
+            color: #aaa;
+        }
+        
+        .section-title {
+            font-size: 1em;
+            color: #feca57;
+            margin: 20px 0 10px 0;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .quick-btn {
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 6px;
+            color: #aaa;
+            font-size: 0.8em;
+            cursor: pointer;
+        }
+        
+        .quick-btn:hover {
+            background: rgba(255,107,107,0.2);
+            color: #fff;
+        }
+        
+        .formula-box {
+            background: rgba(0,0,0,0.4);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            color: #aaa;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+            font-size: 0.9em;
+        }
+        
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        th { color: #feca57; }
+        td { color: #ccc; }
+        tr:hover td { background: rgba(255,255,255,0.05); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔬 CFD参数计算器集</h1>
+            <p class="subtitle">数值仿真 & 空气动力学计算工具</p>
+        </header>
+        
+        <!-- 标签页 -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('yplus')">y+ 计算器</button>
+            <button class="tab-btn" onclick="showTab('boundary')">附面层</button>
+            <button class="tab-btn" onclick="showTab('drag')">阻力</button>
+            <button class="tab-btn" onclick="showTab('lift')">升力</button>
+            <button class="tab-btn" onclick="showTab('pressure')">压力系数</button>
+            <button class="tab-btn" onclick="showTab('reynolds')">雷诺数</button>
+        </div>
+        
+        <!-- y+ 计算器 -->
+        <div id="yplus" class="tab-content active">
+            <div class="card">
+                <h2>📐 y+ 计算器</h2>
+                
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label>飞行高度</label>
+                        <div class="input-row">
+                            <input type="number" id="yplus_alt" value="12000" min="0" max="100000">
+                            <select id="yplus_alt_unit">
+                                <option value="m">m</option>
+                                <option value="km" selected>km</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>马赫数</label>
+                        <input type="number" id="yplus_mach" value="2.0" min="0" max="25" step="0.1">
+                    </div>
+                    <div class="input-group">
+                        <label>特征长度/弦长 (m)</label>
+                        <input type="number" id="yplus_chord" value="1.0" min="0.01">
+                    </div>
+                </div>
+                
+                <button class="calc-btn" onclick="calcYPlus()">计算 y+</button>
+                
+                <div class="results-grid" id="yplus_results" style="margin-top:20px;"></div>
+                
+                <div class="formula-box">
+                    <strong>公式：</strong><br>
+                    y+ = ρ × u* × y / μ = u* × y / ν<br>
+                    u* = √(τw/ρ)， τw = 0.5 × Cf × ρ × V²<br>
+                    第一层网格高度: Δy = y+ × ν / u*
+                </div>
+            </div>
+        </div>
+        
+        <!-- 附面层计算器 -->
+        <div id="boundary" class="tab-content">
+            <div class="card">
+                <h2>🌊 附面层厚度计算器</h2>
+                
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label>飞行高度 (km)</label>
+                        <input type="number" id="bl_alt" value="12" min="0" max="100">
+                    </div>
+                    <div class="input-group">
+                        <label>马赫数</label>
+                        <input type="number" id="bl_mach" value="2.0" min="0" max="25">
+                    </div>
+                    <div class="input-group">
+                        <label>沿程位置 x (m)</label>
+                        <input type="number" id="bl_x" value="1.0" min="0.01">
+                    </div>
+                </div>
+                
+                <button class="calc-btn" onclick="calcBL()">计算附面层</button>
+                
+                <div class="results-grid" id="bl_results" style="margin-top:20px;"></div>
+            </div>
+        </div>
+        
+        <!-- 阻力计算器 -->
+        <div id="drag" class="tab-content">
+            <div class="card">
+                <h2>💨 阻力计算器</h2>
+                
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label>飞行高度 (km)</label>
+                        <input type="number" id="drag_alt" value="12" min="0" max="100">
+                    </div>
+                    <div class="input-group">
+                        <label>马赫数</label>
+                        <input type="number" id="drag_mach" value="2.0" min="0" max="25">
+                    </div>
+                    <div class="input-group">
+                        <label>参考面积 (m²)</label>
+                        <input type="number" id="drag_area" value="1.0" min="0.01">
+                    </div>
+                    <div class="input-group">
+                        <label>物体类型</label>
+                        <select id="drag_body">
+                            <option value="sphere">球体 (Cd=0.47)</option>
+                            <option value="flat_plate">平板 (Cd≈0.002)</option>
+                            <option value="cylinder">圆柱 (Cd=0.99)</option>
+                            <option value="airfoil_0deg">翼型0° (Cd=0.006)</option>
+                            <option value="airfoil_10deg">翼型10° (Cd=0.08)</option>
+                            <option value="car">汽车 (Cd=0.3)</option>
+                            <option value="truck">卡车 (Cd=0.7)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button class="calc-btn" onclick="calcDrag()">计算阻力</button>
+                
+                <div class="results-grid" id="drag_results" style="margin-top:20px;"></div>
+            </div>
+        </div>
+        
+        <!-- 升力计算器 -->
+        <div id="lift" class="tab-content">
+            <div class="card">
+                <h2>⬆️ 升力计算器</h2>
+                
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label>飞行高度 (km)</label>
+                        <input type="number" id="lift_alt" value="12" min="0" max="100">
+                    </div>
+                    <div class="input-group">
+                        <label>马赫数</label>
+                        <input type="number" id="lift_mach" value="2.0" min="0" max="25">
+                    </div>
+                    <div class="input-group">
+                        <label>参考面积 (m²)</label>
+                        <input type="number" id="lift_area" value="1.0" min="0.01">
+                    </div>
+                    <div class="input-group">
+                        <label>迎角 α (度)</label>
+                        <input type="number" id="lift_alpha" value="10" min="-20" max="90">
+                    </div>
+                </div>
+                
+                <button class="calc-btn" onclick="calcLift()">计算升力</button>
+                
+                <div class="results-grid" id="lift_results" style="margin-top:20px;"></div>
+            </div>
+        </div>
+        
+        <!-- 压力系数 -->
+        <div id="pressure" class="tab-content">
+            <div class="card">
+                <h2>📊 压力系数计算器</h2>
+                
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label>马赫数</label>
+                        <input type="number" id="cp_mach" value="2.0" min="0" max="25" step="0.1">
+                    </div>
+                </div>
+                
+                <button class="calc-btn" onclick="calcCP()">计算压力系数</button>
+                
+                <div class="results-grid" id="cp_results" style="margin-top:20px;"></div>
+            </div>
+        </div>
+        
+        <!-- 雷诺数 -->
+        <div id="reynolds" class="tab-content">
+            <div class="card">
+                <h2>🔄 雷诺数计算器</h2>
+                
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label>飞行高度 (km)</label>
+                        <input type="number" id="re_alt" value="12" min="0" max="100">
+                    </div>
+                    <div class="input-group">
+                        <label>马赫数</label>
+                        <input type="number" id="re_mach" value="2.0" min="0" max="25">
+                    </div>
+                    <div class="input-group">
+                        <label>特征长度 (m)</label>
+                        <input type="number" id="re_length" value="1.0" min="0.01">
+                    </div>
+                </div>
+                
+                <button class="calc-btn" onclick="calcRe()">计算雷诺数</button>
+                
+                <div class="results-grid" id="re_results" style="margin-top:20px;"></div>
+            </div>
+        </div>
+        
+    </div>
+
+    <script>
+        // 物理常数
+        const R = 287.052;
+        const GAMMA = 1.4;
+        const G = 9.80665;
+        
+        // 大气模型
+        const LAYERS = [
+            {h: 11000, T: 216.65, dT: -0.0065},
+            {h: 20000, T: 216.65, dT: 0},
+            {h: 32000, T: 228.65, dT: 0.001},
+            {h: 47000, T: 270.65, dT: 0.0028},
+            {h: 51000, T: 270.65, dT: 0},
+            {h: 71000, T: 214.65, dT: -0.0028},
+            {h: 80000, T: 196.65, dT: -0.002},
+            {h: 90000, T: 196.65, dT: 0},
+            {h: 110000, T: 186.87, dT: 0.002},
+        ];
+        
+        const SEA_LEVEL_PRESSURE = 101325;
+        const SEA_LEVEL_TEMPERATURE = 288.15;
+        
+        function temperature(alt) {
+            if (alt < 0) alt = 0;
+            if (alt === 0) return SEA_LEVEL_TEMPERATURE;
+            let T = SEA_LEVEL_TEMPERATURE, h_prev = 0;
+            for (let layer of LAYERS) {
+                if (alt <= layer.h) {
+                    let h = alt - h_prev;
+                    if (Math.abs(layer.dT) > 1e-10) T += layer.dT * h;
+                    break;
+                }
+                let h = layer.h - h_prev;
+                if (Math.abs(layer.dT) > 1e-10) T += layer.dT * h;
+                else T = layer.T;
+                h_prev = layer.h;
+            }
+            return T;
+        }
+        
+        function pressure(alt) {
+            if (alt < 0) alt = 0;
+            if (alt === 0) return SEA_LEVEL_PRESSURE;
+            let p = SEA_LEVEL_PRESSURE, h_prev = 0, T_prev = SEA_LEVEL_TEMPERATURE;
+            for (let layer of LAYERS) {
+                if (alt <= layer.h) {
+                    let h = alt - h_prev;
+                    if (Math.abs(layer.dT) < 1e-10) p *= Math.exp(-G * h / (R * T_prev));
+                    else { let T = T_prev + layer.dT * h; if (T > 0) p *= Math.pow(T / T_prev, -G / (R * layer.dT)); }
+                    break;
+                }
+                let h = layer.h - h_prev;
+                if (Math.abs(layer.dT) < 1e-10) p *= Math.exp(-G * h / (R * T_prev));
+                else { let T = T_prev + layer.dT * h; if (T > 0) p *= Math.pow(T / T_prev, -G / (R * layer.dT)); }
+                h_prev = layer.h;
+                T_prev = layer.T;
+            }
+            return p;
+        }
+        
+        function density(alt) {
+            return pressure(alt) / (R * temperature(alt));
+        }
+        
+        function speedOfSound(alt) {
+            return Math.sqrt(GAMMA * R * temperature(alt));
+        }
+        
+        function viscosity(alt) {
+            let T = temperature(alt);
+            let mu_ref = 1.716e-5, T_ref = 273.15, S = 110.4;
+            return mu_ref * Math.pow(T / T_ref, 1.5) * ((T_ref + S) / (T + S));
+        }
+        
+        // 标签页切换
+        function showTab(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        // 阻力系数表
+        const CD_VALUES = {
+            sphere: 0.47, flat_plate: 0.002, cylinder: 0.99,
+            airfoil_0deg: 0.006, airfoil_10deg: 0.08, car: 0.3, truck: 0.7
+        };
+        
+        // y+ 计算
+        function calcYPlus() {
+            let alt = parseFloat(document.getElementById('yplus_alt').value);
+            if (document.getElementById('yplus_alt_unit').value === 'km') alt *= 1000;
+            let mach = parseFloat(document.getElementById('yplus_mach').value);
+            let chord = parseFloat(document.getElementById('yplus_chord').value);
+            
+            let rho = density(alt);
+            let mu = viscosity(alt);
+            let nu = mu / rho;
+            let a = speedOfSound(alt);
+            let V = mach * a;
+            
+            // 摩阻系数 (Schlichting)
+            let Re_x = rho * V * chord / mu;
+            let cf = Re_x < 5e5 ? 1.328 / Math.sqrt(Re_x) : 0.074 * Math.pow(Re_x, -0.2);
+            
+            let tau_w = 0.5 * cf * rho * V * V;
+            let u_star = Math.sqrt(tau_w / rho);
+            
+            // 不同模型的y+
+            let models = { 'k-ω SST (y+≈1)': 1, 'Standard k-ε': 30, 'Scalable wall fn': 11 };
+            
+            let html = '<div class="result-item highlight"><div class="result-label">飞行速度</div><div class="result-value">' + V.toFixed(1) + '</div><div class="result-unit">m/s</div></div>';
+            html += '<div class="result-item"><div class="result-label">雷诺数 Re</div><div class="result-value">' + Re_x.toExponential(2) + '</div></div>';
+            html += '<div class="result-item"><div class="result-label">摩阻系数 Cf</div><div class="result-value">' + cf.toExponential(4) + '</div></div>';
+            html += '<div class="result-item"><div class="result-label">壁面剪切应力</div><div class="result-value">' + tau_w.toFixed(3) + '</div><div class="result-unit">Pa</div></div>';
+            html += '<div class="result-item"><div class="result-label">摩擦速度 u*</div><div class="result-value">' + u_star.toFixed(2) + '</div><div class="result-unit">m/s</div></div>';
+            
+            html += '<div class="section-title">第一层网格高度建议</div>';
+            for (let [model, yp] of Object.entries(models)) {
+                let dy = yp * nu / u_star;
+                html += '<div class="result-item info"><div class="result-label">' + model + '</div><div class="result-value">' + (dy*1e6).toFixed(3) + '</div><div class="result-unit">μm</div></div>';
+            }
+            
+            document.getElementById('yplus_results').innerHTML = html;
+        }
+        
+        // 附面层计算
+        function calcBL() {
+            let alt = parseFloat(document.getElementById('bl_alt').value) * 1000;
+            let mach = parseFloat(document.getElementById('bl_mach').value);
+            let x = parseFloat(document.getElementById('bl_x').value);
+            
+            let rho = density(alt);
+            let mu = viscosity(alt);
+            let a = speedOfSound(alt);
+            let V = mach * a;
+            let nu = mu / rho;
+            let Re_x = rho * V * x / mu;
+            let turbulent = Re_x > 5e5;
+            
+            let delta = turbulent ? 0.37 * x / Math.pow(Re_x, 0.2) : 5.0 * x / Math.sqrt(Re_x);
+            let delta_star = turbulent ? 0.046 * x / Math.pow(Re_x, 0.2) : 1.7208 * x / Math.sqrt(Re_x);
+            let theta = turbulent ? 0.036 * x / Math.pow(Re_x, 0.2) : 0.664 * x / Math.sqrt(Re_x);
+            let H = delta_star / theta;
+            
+            let html = '<div class="result-item highlight"><div class="result-label">雷诺数 Re_x</div><div class="result-value">' + Re_x.toExponential(2) + '</div></div>';
+            html += '<div class="result-item info"><div class="result-label">流态</div><div class="result-value">' + (turbulent ? '湍流' : '层流') + '</div></div>';
+            html += '<div class="result-item"><div class="result-label">附面层厚度 δ</div><div class="result-value">' + (delta*1000).toFixed(4) + '</div><div class="result-unit">mm</div></div>';
+            html += '<div class="result-item"><div class="result-label">排移厚度 δ*</div><div class="result-value">' + (delta_star*1000).toFixed(4) + '</div><div class="result-unit">mm</div></div>';
+            html += '<div class="result-item"><div class="result-label">动量厚度 θ</div><div class="result-value">' + (theta*1000).toFixed(4) + '</div><div class="result-unit">mm</div></div>';
+            html += '<div class="result-item highlight"><div class="result-label">形状因子 H</div><div class="result-value">' + H.toFixed(3) + '</div></div>';
+            
+            document.getElementById('bl_results').innerHTML = html;
+        }
+        
+        // 阻力计算
+        function calcDrag() {
+            let alt = parseFloat(document.getElementById('drag_alt').value) * 1000;
+            let mach = parseFloat(document.getElementById('drag_mach').value);
+            let area = parseFloat(document.getElementById('drag_area').value);
+            let body = document.getElementById('drag_body').value;
+            
+            let rho = density(alt);
+            let a = speedOfSound(alt);
+            let V = mach * a;
+            let q = 0.5 * rho * V * V;
+            let cd = CD_VALUES[body];
+            let D = cd * q * area;
+            
+            let html = '<div class="result-item highlight"><div class="result-label">动压 q</div><div class="result-value">' + q.toFixed(1) + '</div><div class="result-unit">Pa</div></div>';
+            html += '<div class="result-item"><div class="result-label">阻力系数 Cd</div><div class="result-value">' + cd.toFixed(4) + '</div></div>';
+            html += '<div class="result-item highlight"><div class="result-label">阻力 D</div><div class="result-value">' + D.toFixed(2) + '</div><div class="result-unit">N</div></div>';
+            
+            document.getElementById('drag_results').innerHTML = html;
+        }
+        
+        // 升力计算
+        function calcLift() {
+            let alt = parseFloat(document.getElementById('lift_alt').value) * 1000;
+            let mach = parseFloat(document.getElementById('lift_mach').value);
+            let area = parseFloat(document.getElementById('lift_area').value);
+            let alpha = parseFloat(document.getElementById('lift_alpha').value);
+            
+            let rho = density(alt);
+            let a = speedOfSound(alt);
+            let V = mach * a;
+            let q = 0.5 * rho * V * V;
+            
+            let cl_alpha = 2 * Math.PI; // 薄翼理论
+            let cl = cl_alpha * Math.PI * alpha / 180;
+            let L = cl * q * area;
+            
+            let html = '<div class="result-item"><div class="result-label">动压 q</div><div class="result-value">' + q.toFixed(1) + '</div><div class="result-unit">Pa</div></div>';
+            html += '<div class="result-item"><div class="result-label">升力系数 Cl</div><div class="result-value">' + cl.toFixed(4) + '</div></div>';
+            html += '<div class="result-item highlight"><div class="result-label">升力 L</div><div class="result-value">' + L.toFixed(2) + '</div><div class="result-unit">N</div></div>';
+            
+            document.getElementById('lift_results').innerHTML = html;
+        }
+        
+        // 压力系数
+        function calcCP() {
+            let mach = parseFloat(document.getElementById('cp_mach').value);
+            let a = Math.sqrt(GAMMA * R * SEA_LEVEL_TEMPERATURE);
+            let V = mach * a;
+            let q = 0.5 * SEA_LEVEL_PRESSURE / (R * SEA_LEVEL_TEMPERATURE) * V * V;
+            let cp_stag = 1 - 1 / Math.pow(1 + (GAMMA-1)/2 * mach * mach, GAMMA/(GAMMA-1));
+            
+            let html = '<div class="result-item"><div class="result-label">来流速度</div><div class="result-value">' + V.toFixed(1) + '</div><div class="result-unit">m/s</div></div>';
+            html += '<div class="result-item"><div class="result-label">动压</div><div class="result-value">' + q.toFixed(1) + '</div><div class="result-unit">Pa</div></div>';
+            html += '<div class="result-item highlight"><div class="result-label">滞止点 Cp</div><div class="result-value">' + cp_stag.toFixed(4) + '</div></div>';
+            
+            document.getElementById('cp_results').innerHTML = html;
+        }
+        
+        // 雷诺数
+        function calcRe() {
+            let alt = parseFloat(document.getElementById('re_alt').value) * 1000;
+            let mach = parseFloat(document.getElementById('re_mach').value);
+            let L = parseFloat(document.getElementById('re_length').value);
+            
+            let rho = density(alt);
+            let mu = viscosity(alt);
+            let a = speedOfSound(alt);
+            let V = mach * a;
+            let Re = rho * V * L / mu;
+            let Re_crit = 5e5;
+            
+            let html = '<div class="result-item highlight"><div class="result-label">雷诺数 Re</div><div class="result-value">' + Re.toExponential(2) + '</div></div>';
+            html += '<div class="result-item"><div class="result-label">临界雷诺数</div><div class="result-value">' + Re_crit.toExponential(2) + '</div></div>';
+            html += '<div class="result-item info"><div class="result-label">流态判断</div><div class="result-value">' + (Re > Re_crit ? '湍流' : '层流') + '</div></div>';
+            
+            document.getElementById('re_results').innerHTML = html;
+        }
+        
+        // 初始化
+        calcYPlus();
+    </script>
+</body>
+</html>

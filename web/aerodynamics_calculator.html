@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>空气动力学参数计算器 | NASA标准大气模型</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #e4e4e4;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+        }
+        
+        h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00d9ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            color: #888;
+            font-size: 1em;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .card h2 {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #00d9ff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #aaa;
+            font-size: 0.9em;
+        }
+        
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+        
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #00d9ff;
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.2);
+        }
+        
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .unit {
+            color: #888;
+            font-size: 0.85em;
+            margin-top: 4px;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px 24px;
+            background: linear-gradient(90deg, #00d9ff, #00ff88);
+            border: none;
+            border-radius: 8px;
+            color: #1a1a2e;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.3);
+        }
+        
+        .quick-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        
+        .quick-btn {
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            color: #aaa;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .quick-btn:hover {
+            background: rgba(0, 217, 255, 0.2);
+            border-color: #00d9ff;
+            color: #fff;
+        }
+        
+        .results-section {
+            display: none;
+        }
+        
+        .results-section.active {
+            display: block;
+        }
+        
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .result-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 16px;
+            border-radius: 10px;
+            border-left: 3px solid #00d9ff;
+        }
+        
+        .result-item.highlight {
+            border-left-color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+        }
+        
+        .result-item.warning {
+            border-left-color: #ff6b6b;
+        }
+        
+        .result-label {
+            font-size: 0.8em;
+            color: #888;
+            margin-bottom: 4px;
+        }
+        
+        .result-value {
+            font-size: 1.4em;
+            font-weight: 600;
+            color: #fff;
+        }
+        
+        .result-unit {
+            font-size: 0.85em;
+            color: #aaa;
+        }
+        
+        .section-title {
+            font-size: 1em;
+            color: #00d9ff;
+            margin: 24px 0 12px 0;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .chart-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+        
+        .info-box {
+            background: rgba(0, 217, 255, 0.1);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #aaa;
+        }
+        
+        .info-box strong {
+            color: #00d9ff;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+        
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .result-item {
+            animation: fadeIn 0.3s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛫 空气动力学参数计算器</h1>
+            <p class="subtitle">基于 NASA US Standard Atmosphere 1976 模型</p>
+        </header>
+        
+        <div class="main-content">
+            <!-- 输入面板 -->
+            <div class="card">
+                <h2>📥 输入参数</h2>
+                
+                <div class="input-group">
+                    <label>飞行高度</label>
+                    <div class="input-row">
+                        <input type="number" id="altitude" value="12000" min="0" max="100000" step="100">
+                        <select id="altitudeUnit">
+                            <option value="m">米 (m)</option>
+                            <option value="km" selected>千米 (km)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>马赫数 (Mach)</label>
+                    <input type="number" id="mach" value="2.0" min="0" max="25" step="0.1">
+                    <div class="unit">M = V / a (飞行速度 / 当地声速)</div>
+                </div>
+                
+                <button onclick="calculate()">计算参数</button>
+                
+                <div class="quick-buttons">
+                    <span style="color:#888;font-size:0.85em;width:100%;margin-bottom:4px;">快速选择：</span>
+                    <button class="quick-btn" onclick="setQuick(0, 0.3)">起飞 (0km, M0.3)</button>
+                    <button class="quick-btn" onclick="setQuick(10, 0.85)">巡航 (10km, M0.85)</button>
+                    <button class="quick-btn" onclick="setQuick(12, 2.0)">超音速 (12km, M2.0)</button>
+                    <button class="quick-btn" onclick="setQuick(20, 3.0)">高超音速 (20km, M3.0)</button>
+                    <button class="quick-btn" onclick="setQuick(30, 6.0)">极高超音速 (30km, M6.0)</button>
+                </div>
+            </div>
+            
+            <!-- 结果面板 -->
+            <div class="card results-section" id="resultsSection">
+                <h2>📊 计算结果</h2>
+                
+                <!-- 飞行条件 -->
+                <div class="section-title">飞行条件</div>
+                <div class="result-grid">
+                    <div class="result-item highlight">
+                        <div class="result-label">飞行高度</div>
+                        <div class="result-value" id="resAltitude">-</div>
+                        <div class="result-unit">m</div>
+                    </div>
+                    <div class="result-item highlight">
+                        <div class="result-label">马赫数</div>
+                        <div class="result-value" id="resMach">-</div>
+                        <div class="result-unit">M</div>
+                    </div>
+                    <div class="result-item highlight">
+                        <div class="result-label">飞行速度</div>
+                        <div class="result-value" id="resVelocity">-</div>
+                        <div class="result-unit">m/s</div>
+                    </div>
+                </div>
+                
+                <!-- 大气参数 -->
+                <div class="section-title">大气环境参数</div>
+                <div class="result-grid">
+                    <div class="result-item">
+                        <div class="result-label">静态温度 T</div>
+                        <div class="result-value" id="resTemperature">-</div>
+                        <div class="result-unit">K</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">静态温度</div>
+                        <div class="result-value" id="resTemperatureC">-</div>
+                        <div class="result-unit">°C</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">静态压力 P</div>
+                        <div class="result-value" id="resPressure">-</div>
+                        <div class="result-unit">Pa</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">空气密度 ρ</div>
+                        <div class="result-value" id="resDensity">-</div>
+                        <div class="result-unit">kg/m³</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">当地声速 a</div>
+                        <div class="result-value" id="resSoundSpeed">-</div>
+                        <div class="result-unit">m/s</div>
+                    </div>
+                </div>
+                
+                <!-- 总温总压 -->
+                <div class="section-title">总温总压 (滞止参数)</div>
+                <div class="result-grid">
+                    <div class="result-item highlight">
+                        <div class="result-label">总温 T₀</div>
+                        <div class="result-value" id="resTotalTemp">-</div>
+                        <div class="result-unit">K</div>
+                    </div>
+                    <div class="result-item highlight">
+                        <div class="result-label">总压 P₀</div>
+                        <div class="result-value" id="resTotalPressure">-</div>
+                        <div class="result-unit">Pa</div>
+                    </div>
+                    <div class="result-item highlight">
+                        <div class="result-label">动压 q</div>
+                        <div class="result-value" id="resDynamicPressure">-</div>
+                        <div class="result-unit">Pa</div>
+                    </div>
+                </div>
+                
+                <!-- 粘性与雷诺数 -->
+                <div class="section-title">粘性参数</div>
+                <div class="result-grid">
+                    <div class="result-item">
+                        <div class="result-label">动力粘度 μ</div>
+                        <div class="result-value" id="resViscosity">-</div>
+                        <div class="result-unit">Pa·s</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">运动粘度 ν</div>
+                        <div class="result-value" id="resKinematicVisc">-</div>
+                        <div class="result-unit">m²/s</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">每米雷诺数</div>
+                        <div class="result-value" id="resReynolds">-</div>
+                        <div class="result-unit">1/m</div>
+                    </div>
+                </div>
+                
+                <div class="info-box">
+                    <strong>💡 公式说明：</strong><br>
+                    • 总温 T₀ = T × (1 + (γ-1)/2 × M²)<br>
+                    • 总压 P₀ = P × (1 + (γ-1)/2 × M²)^(γ/(γ-1))<br>
+                    • 动压 q = 0.5 × ρ × V²<br>
+                    • 声速 a = √(γ × R × T)<br>
+                    其中 γ=1.4, R=287.052 J/(kg·K)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 物理常数
+        const R = 287.052;
+        const GAMMA = 1.4;
+        const G = 9.80665;
+        const SEA_LEVEL_PRESSURE = 101325.0;
+        const SEA_LEVEL_TEMPERATURE = 288.15;
+
+        // 大气分层数据 (高度上限, 该高度温度, 温度梯度)
+        const LAYERS = [
+            {h: 11000, T: 216.65, dT: -0.0065},   // 0-11km: 288.15K -> 216.65K
+            {h: 20000, T: 216.65, dT: 0},          // 11-20km: 等温 216.65K
+            {h: 32000, T: 228.65, dT: 0.001},      // 20-32km: 216.65K -> 228.65K
+            {h: 47000, T: 270.65, dT: 0.0028},     // 32-47km: 228.65K -> 270.65K
+            {h: 51000, T: 270.65, dT: 0},          // 47-51km: 等温 270.65K
+            {h: 71000, T: 214.65, dT: -0.0028},    // 51-71km: 270.65K -> 214.65K
+            {h: 80000, T: 196.65, dT: -0.002},     // 71-80km: 214.65K -> 196.65K
+            {h: 90000, T: 196.65, dT: 0},          // 80-90km: 等温 196.65K
+            {h: 110000, T: 186.87, dT: 0.002},    // 90-110km: 196.65K -> 186.87K
+        ];
+
+        function temperature(altitude) {
+            if (altitude < 0) altitude = 0;
+            if (altitude === 0) return SEA_LEVEL_TEMPERATURE;
+            
+            let T = SEA_LEVEL_TEMPERATURE;
+            let h_prev = 0;
+            
+            for (let layer of LAYERS) {
+                if (altitude <= layer.h) {
+                    let h = altitude - h_prev;
+                    if (Math.abs(layer.dT) > 1e-10) T += layer.dT * h;
+                    break;
+                }
+                let h = layer.h - h_prev;
+                if (Math.abs(layer.dT) > 1e-10) T += layer.dT * h;
+                else T = layer.T;
+                h_prev = layer.h;
+            }
+            return T;
+        }
+
+        function pressure(altitude) {
+            if (altitude < 0) altitude = 0;
+            if (altitude === 0) return SEA_LEVEL_PRESSURE;
+            
+            let p = SEA_LEVEL_PRESSURE;
+            let h_prev = 0;
+            let T_prev = SEA_LEVEL_TEMPERATURE;
+            
+            for (let layer of LAYERS) {
+                if (altitude <= layer.h) {
+                    let h = altitude - h_prev;
+                    if (Math.abs(layer.dT) < 1e-10) {
+                        p *= Math.exp(-G * h / (R * T_prev));
+                    } else {
+                        let T_curr = T_prev + layer.dT * h;
+                        if (T_curr > 0) p *= Math.pow(T_curr / T_prev, -G / (R * layer.dT));
+                    }
+                    break;
+                }
+                
+                let h = layer.h - h_prev;
+                if (Math.abs(layer.dT) < 1e-10) {
+                    p *= Math.exp(-G * h / (R * T_prev));
+                } else {
+                    let T_curr = T_prev + layer.dT * h;
+                    if (T_curr > 0) p *= Math.pow(T_curr / T_prev, -G / (R * layer.dT));
+                }
+                
+                h_prev = layer.h;
+                if (Math.abs(layer.dT) < 1e-10) T_prev = layer.T;
+                else T_prev += layer.dT * h;
+            }
+            return p;
+        }
+
+        function density(altitude) {
+            let T = temperature(altitude);
+            let p = pressure(altitude);
+            return p / (R * T);
+        }
+
+        function speedOfSound(altitude) {
+            let T = temperature(altitude);
+            return Math.sqrt(GAMMA * R * T);
+        }
+
+        function dynamicViscosity(altitude) {
+            let T = temperature(altitude);
+            let mu_ref = 1.716e-5;
+            let T_ref = 273.15;
+            let S = 110.4;
+            return mu_ref * Math.pow(T / T_ref, 1.5) * ((T_ref + S) / (T + S));
+        }
+
+        function calculate() {
+            // 获取输入
+            let altitude = parseFloat(document.getElementById('altitude').value);
+            const unit = document.getElementById('altitudeUnit').value;
+            const mach = parseFloat(document.getElementById('mach').value);
+            
+            // 转换单位
+            if (unit === 'km') altitude *= 1000;
+            
+            // 计算大气参数
+            const T = temperature(altitude);
+            const p = pressure(altitude);
+            const rho = density(altitude);
+            const a = speedOfSound(altitude);
+            const mu = dynamicViscosity(altitude);
+            const nu = mu / rho;
+            const V = mach * a;
+            
+            // 计算总温总压
+            const T0 = T * (1 + (GAMMA - 1) / 2 * mach * mach);
+            const p0 = p * Math.pow(1 + (GAMMA - 1) / 2 * mach * mach, GAMMA / (GAMMA - 1));
+            
+            // 计算动压
+            const q = 0.5 * rho * V * V;
+            
+            // 计算雷诺数/米
+            const Re_m = rho * V / mu;
+            
+            // 更新界面
+            document.getElementById('resAltitude').textContent = altitude.toLocaleString();
+            document.getElementById('resMach').textContent = mach.toFixed(3);
+            document.getElementById('resVelocity').textContent = V.toFixed(2);
+            
+            document.getElementById('resTemperature').textContent = T.toFixed(2);
+            document.getElementById('resTemperatureC').textContent = (T - 273.15).toFixed(2);
+            document.getElementById('resPressure').textContent = p.toFixed(2);
+            document.getElementById('resDensity').textContent = rho.toFixed(6);
+            document.getElementById('resSoundSpeed').textContent = a.toFixed(2);
+            
+            document.getElementById('resTotalTemp').textContent = T0.toFixed(2);
+            document.getElementById('resTotalPressure').textContent = p0.toFixed(2);
+            document.getElementById('resDynamicPressure').textContent = q.toFixed(2);
+            
+            document.getElementById('resViscosity').textContent = mu.toExponential(2);
+            document.getElementById('resKinematicVisc').textContent = nu.toExponential(2);
+            document.getElementById('resReynolds').textContent = Re_m.toExponential(2);
+            
+            // 显示结果面板
+            document.getElementById('resultsSection').classList.add('active');
+        }
+
+        function setQuick(altKm, mach) {
+            document.getElementById('altitude').value = altKm;
+            document.getElementById('altitudeUnit').value = 'km';
+            document.getElementById('mach').value = mach;
+            calculate();
+        }
+
+        // 页面加载时计算默认值
+        window.onload = calculate;
+    </script>
+</body>
+</html>

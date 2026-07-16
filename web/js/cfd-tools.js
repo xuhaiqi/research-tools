@@ -1,16 +1,16 @@
 /**
- * 数值仿真工具 - JavaScript计算逻辑
- * 基于 NASA US Standard Atmosphere 1976
+ * Numerical Simulation Tools - JavaScript
+ * Based on NASA US Standard Atmosphere 1976
  */
 
-// ==================== 大气模型 ====================
+// ==================== Atmosphere Model ====================
 const R = 287.052;
 const GAMMA = 1.4;
 const G = 9.80665;
 const SEA_LEVEL_PRESSURE = 101325;
 const SEA_LEVEL_TEMPERATURE = 288.15;
 
-// 大气分层数据
+// Atmosphere layers
 const ATMOSPHERE_LAYERS = [
     {h: 11000, T: 216.65, dT: -0.0065},
     {h: 20000, T: 216.65, dT: 0},
@@ -83,16 +83,12 @@ function viscosity(alt) {
     return mu_ref * Math.pow(T / T_ref, 1.5) * ((T_ref + S) / (T + S));
 }
 
-// ==================== 工具切换 ====================
+// ==================== Tool Switch ====================
 function switchTool(toolId) {
-    // 隐藏所有section
     document.querySelectorAll('.calc-section').forEach(s => s.classList.remove('active'));
-    // 显示选中的section
     document.getElementById(toolId).classList.add('active');
-    // 更新tab状态
     document.querySelectorAll('.tool-tab').forEach(t => t.classList.remove('active'));
     event.target.classList.add('active');
-    // 更新导航
     document.querySelectorAll('.tool-nav a').forEach(a => a.classList.remove('active'));
     document.querySelector(`[data-tool="${toolId}"]`).classList.add('active');
 }
@@ -102,12 +98,11 @@ function setQuick(prefix, altKm, mach) {
     document.getElementById(prefix + '-alt-unit').value = 'km';
     document.getElementById(prefix + '-mach').value = mach;
     
-    // 触发计算
     if (prefix === 'atmo') calcAtmosphere();
     else if (prefix === 'yplus') calcYPlus();
 }
 
-// ==================== 1. 大气参数计算 ====================
+// ==================== 1. Atmosphere Calculator ====================
 function calcAtmosphere() {
     let alt = parseFloat(document.getElementById('atmo-alt').value);
     if (document.getElementById('atmo-alt-unit').value === 'km') alt *= 1000;
@@ -120,48 +115,42 @@ function calcAtmosphere() {
     let V = mach * a;
     let q = 0.5 * rho * V * V;
     
-    // 总温总压
     let T0 = T * (1 + (GAMMA - 1) / 2 * mach * mach);
     let p0 = p * Math.pow(1 + (GAMMA - 1) / 2 * mach * mach, GAMMA / (GAMMA - 1));
     
-    // 粘度
     let mu = viscosity(alt);
     let nu = mu / rho;
     let Re_m = rho * V / mu;
     
     let html = '';
     
-    // 飞行条件
-    html += '<div class="section-title">飞行条件</div>';
-    html += resultItem('飞行高度', (alt/1000).toFixed(2), 'km', 'highlight');
-    html += resultItem('马赫数', mach.toFixed(3), 'M', 'highlight');
-    html += resultItem('飞行速度', V.toFixed(1), 'm/s', 'highlight');
+    html += '<div class="section-title">Flight Condition</div>';
+    html += resultItem('Altitude', (alt/1000).toFixed(2), 'km', 'highlight');
+    html += resultItem('Mach Number', mach.toFixed(3), 'M', 'highlight');
+    html += resultItem('Velocity', V.toFixed(1), 'm/s', 'highlight');
     
-    // 大气参数
-    html += '<div class="section-title">大气环境参数</div>';
-    html += resultItem('静态温度 T', T.toFixed(2), 'K');
-    html += resultItem('静态温度', (T - 273.15).toFixed(2), '°C');
-    html += resultItem('静态压力 P', p.toFixed(2), 'Pa');
-    html += resultItem('静态压力', (p/1000).toFixed(4), 'kPa');
-    html += resultItem('空气密度 ρ', rho.toFixed(6), 'kg/m³');
-    html += resultItem('声速 a', a.toFixed(2), 'm/s');
+    html += '<div class="section-title">Atmospheric Parameters</div>';
+    html += resultItem('Static Temp T', T.toFixed(2), 'K');
+    html += resultItem('Static Temp', (T - 273.15).toFixed(2), 'C');
+    html += resultItem('Static Pressure P', p.toFixed(2), 'Pa');
+    html += resultItem('Static Pressure', (p/1000).toFixed(4), 'kPa');
+    html += resultItem('Density', rho.toFixed(6), 'kg/m3');
+    html += resultItem('Speed of Sound', a.toFixed(2), 'm/s');
     
-    // 总温总压
-    html += '<div class="section-title">总温总压 (滞止参数)</div>';
-    html += resultItem('总温 T₀', T0.toFixed(2), 'K', 'highlight');
-    html += resultItem('总压 P₀', p0.toFixed(2), 'Pa', 'highlight');
-    html += resultItem('动压 q', q.toFixed(2), 'Pa', 'highlight');
+    html += '<div class="section-title">Total Conditions (Stagnation)</div>';
+    html += resultItem('Total Temp T0', T0.toFixed(2), 'K', 'highlight');
+    html += resultItem('Total Pressure P0', p0.toFixed(2), 'Pa', 'highlight');
+    html += resultItem('Dynamic Pressure', q.toFixed(2), 'Pa', 'highlight');
     
-    // 粘性参数
-    html += '<div class="section-title">粘性参数</div>';
-    html += resultItem('动力粘度 μ', mu.toExponential(2), 'Pa·s');
-    html += resultItem('运动粘度 ν', nu.toExponential(2), 'm²/s');
-    html += resultItem('雷诺数/米', Re_m.toExponential(2), '1/m');
+    html += '<div class="section-title">Viscosity</div>';
+    html += resultItem('Dynamic Viscosity', mu.toExponential(2), 'Pa.s');
+    html += resultItem('Kinematic Visc', nu.toExponential(2), 'm2/s');
+    html += resultItem('Reynolds/m', Re_m.toExponential(2), '1/m');
     
     document.getElementById('atmo-results').innerHTML = html;
 }
 
-// ==================== 2. y+ 计算器 ====================
+// ==================== 2. y+ Calculator ====================
 function calcYPlus() {
     let alt = parseFloat(document.getElementById('yplus-alt').value);
     if (document.getElementById('yplus-alt-unit').value === 'km') alt *= 1000;
@@ -174,39 +163,37 @@ function calcYPlus() {
     let a = speedOfSound(alt);
     let V = mach * a;
     
-    // 摩阻系数 (Schlichting)
     let Re_x = rho * V * chord / mu;
     let cf = Re_x < 5e5 ? 1.328 / Math.sqrt(Re_x) : 0.074 * Math.pow(Re_x, -0.2);
     
     let tau_w = 0.5 * cf * rho * V * V;
     let u_star = Math.sqrt(tau_w / rho);
     
-    // 不同模型的y+
     let models = [
-        {name: 'k-ω SST (y+≈1)', target: 1},
-        {name: 'Standard k-ε', target: 30},
+        {name: 'k-omega SST (y+~1)', target: 1},
+        {name: 'Standard k-epsilon', target: 30},
         {name: 'Scalable wall fn', target: 11},
     ];
     
     let html = '';
     
-    html += '<div class="section-title">流动参数</div>';
-    html += resultItem('雷诺数 Re_x', Re_x.toExponential(2), '', 'highlight');
-    html += resultItem('摩阻系数 Cf', cf.toExponential(4), '');
-    html += resultItem('壁面剪切应力', tau_w.toFixed(3), 'Pa');
-    html += resultItem('摩擦速度 u*', u_star.toFixed(2), 'm/s');
-    html += resultItem('运动粘度 ν', nu.toExponential(2), 'm²/s');
+    html += '<div class="section-title">Flow Parameters</div>';
+    html += resultItem('Reynolds Re_x', Re_x.toExponential(2), '', 'highlight');
+    html += resultItem('Friction Cf', cf.toExponential(4), '');
+    html += resultItem('Wall Shear Stress', tau_w.toFixed(3), 'Pa');
+    html += resultItem('Friction Vel u*', u_star.toFixed(2), 'm/s');
+    html += resultItem('Kinematic Visc', nu.toExponential(2), 'm2/s');
     
-    html += '<div class="section-title">第一层网格高度建议</div>';
+    html += '<div class="section-title">First Layer Grid Height</div>';
     for (let m of models) {
         let dy = m.target * nu / u_star;
-        html += resultItem(m.name, (dy * 1e6).toFixed(3), 'μm', 'highlight');
+        html += resultItem(m.name, (dy * 1e6).toFixed(3), 'um', 'highlight');
     }
     
     document.getElementById('yplus-results').innerHTML = html;
 }
 
-// ==================== 3. 附面层计算 ====================
+// ==================== 3. Boundary Layer ====================
 function calcBL() {
     let alt = parseFloat(document.getElementById('bl-alt').value) * 1000;
     let mach = parseFloat(document.getElementById('bl-mach').value);
@@ -234,29 +221,20 @@ function calcBL() {
     
     let html = '';
     
-    html += '<div class="section-title">基本参数</div>';
-    html += resultItem('雷诺数 Re_x', Re_x.toExponential(2), '', 'highlight');
-    html += resultItem('流态', turbulent ? '湍流' : '层流', '', turbulent ? 'warning' : '');
+    html += '<div class="section-title">Basic Parameters</div>';
+    html += resultItem('Reynolds Re_x', Re_x.toExponential(2), '', 'highlight');
+    html += resultItem('Flow Type', turbulent ? 'Turbulent' : 'Laminar', '', turbulent ? 'warning' : '');
     
-    html += '<div class="section-title">附面层厚度</div>';
-    html += resultItem('附面层厚度 δ', (delta * 1000).toFixed(4), 'mm');
-    html += resultItem('排移厚度 δ*', (delta_star * 1000).toFixed(4), 'mm');
-    html += resultItem('动量厚度 θ', (theta * 1000).toFixed(4), 'mm');
-    html += resultItem('形状因子 H', H.toFixed(3), '', 'highlight');
+    html += '<div class="section-title">Boundary Layer Thickness</div>';
+    html += resultItem('BL Thickness d', (delta * 1000).toFixed(4), 'mm');
+    html += resultItem('Displacement d*', (delta_star * 1000).toFixed(4), 'mm');
+    html += resultItem('Momentum th', (theta * 1000).toFixed(4), 'mm');
+    html += resultItem('Shape Factor H', H.toFixed(3), '', 'highlight');
     
     document.getElementById('bl-results').innerHTML = html;
 }
 
-// ==================== 4. 阻力/升力计算 ====================
-const CD_VALUES = {
-    'sphere': 0.47,
-    'cylinder': 0.99,
-    'airfoil_0': 0.006,
-    'airfoil_10': 0.08,
-    'car': 0.3,
-    'truck': 0.7
-};
-
+// ==================== 4. Drag & Lift ====================
 function calcDragLift() {
     let alt = parseFloat(document.getElementById('dl-alt').value) * 1000;
     let mach = parseFloat(document.getElementById('dl-mach').value);
@@ -268,33 +246,31 @@ function calcDragLift() {
     let V = mach * a;
     let q = 0.5 * rho * V * V;
     
-    // 升力系数 (薄翼理论)
     let cl_alpha = 2 * Math.PI;
     let cl = cl_alpha * Math.PI * alpha / 180;
     let L = cl * q * area;
     
-    // 使用翼型的阻力系数
     let cd = alpha === 0 ? 0.006 : 0.08;
     let D = cd * q * area;
     
     let html = '';
     
-    html += '<div class="section-title">飞行条件</div>';
-    html += resultItem('动压 q', q.toFixed(1), 'Pa');
-    html += resultItem('迎角 α', alpha, '°');
+    html += '<div class="section-title">Flight Condition</div>';
+    html += resultItem('Dynamic Pressure', q.toFixed(1), 'Pa');
+    html += resultItem('Angle of Attack', alpha, 'deg');
     
-    html += '<div class="section-title">升力</div>';
-    html += resultItem('升力系数 Cl', cl.toFixed(4), '', 'highlight');
-    html += resultItem('升力 L', L.toFixed(2), 'N', 'highlight');
+    html += '<div class="section-title">Lift</div>';
+    html += resultItem('Lift Coef Cl', cl.toFixed(4), '', 'highlight');
+    html += resultItem('Lift Force', L.toFixed(2), 'N', 'highlight');
     
-    html += '<div class="section-title">阻力 (翼型近似)</div>';
-    html += resultItem('阻力系数 Cd', cd.toFixed(4), '');
-    html += resultItem('阻力 D', D.toFixed(2), 'N', 'highlight');
+    html += '<div class="section-title">Drag (Airfoil)</div>';
+    html += resultItem('Drag Coef Cd', cd.toFixed(4), '');
+    html += resultItem('Drag Force', D.toFixed(2), 'N', 'highlight');
     
     document.getElementById('dl-results').innerHTML = html;
 }
 
-// ==================== 5. 雷诺数计算 ====================
+// ==================== 5. Reynolds Number ====================
 function calcRe() {
     let alt = parseFloat(document.getElementById('re-alt').value) * 1000;
     let mach = parseFloat(document.getElementById('re-mach').value);
@@ -309,25 +285,24 @@ function calcRe() {
     
     let html = '';
     
-    html += resultItem('雷诺数 Re', Re.toExponential(2), '', 'highlight');
-    html += resultItem('临界雷诺数', Re_crit.toExponential(2), '');
-    html += resultItem('流态', Re > Re_crit ? '湍流' : '层流', '', Re > Re_crit ? 'warning' : '');
-    html += resultItem('空气密度', rho.toExponential(4), 'kg/m³');
-    html += resultItem('动力粘度', mu.toExponential(4), 'Pa·s');
-    html += resultItem('运动粘度', (mu/rho).toExponential(4), 'm²/s');
+    html += resultItem('Reynolds Number', Re.toExponential(2), '', 'highlight');
+    html += resultItem('Critical Re', Re_crit.toExponential(2), '');
+    html += resultItem('Flow Type', Re > Re_crit ? 'Turbulent' : 'Laminar', '', Re > Re_crit ? 'warning' : '');
+    html += resultItem('Density', rho.toExponential(4), 'kg/m3');
+    html += resultItem('Viscosity', mu.toExponential(4), 'Pa.s');
+    html += resultItem('Kinematic Visc', (mu/rho).toExponential(4), 'm2/s');
     
     document.getElementById('re-results').innerHTML = html;
 }
 
-// ==================== 辅助函数 ====================
-function resultItem(label, value, unit = '', cls = '') {
-    return `<div class="result-item ${cls}">
-        <div class="result-label">${label}</div>
-        <div class="result-value">${value}<span class="result-unit">${unit}</span></div>
-    </div>`;
+// ==================== Helper ====================
+function resultItem(label, value, unit, cls) {
+    return '<div class="result-item ' + cls + '">' +
+        '<div class="result-label">' + label + '</div>' +
+        '<div class="result-value">' + value + '<span class="result-unit">' + unit + '</span></div>' +
+    '</div>';
 }
 
-// 初始化
 window.onload = function() {
     calcAtmosphere();
 };
