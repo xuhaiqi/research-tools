@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数值仿真工具 - 空气动力学与CFD计算</title>
+    <meta name="description" content="免费在线数值仿真工具：大气参数计算、y+计算器、附面层计算、阻力升力计算等">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* 数值仿真工具专用样式 */
+        :root {
+            --aero-primary: #0ea5e9;
+            --aero-secondary: #06b6d4;
+            --cfd-primary: #f97316;
+            --cfd-secondary: #fb923c;
+        }
+        
+        .tool-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+        
+        .tool-tab {
+            padding: 10px 20px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+            color: #64748b;
+        }
+        
+        .tool-tab:hover {
+            background: #e0f2fe;
+            border-color: var(--aero-primary);
+            color: var(--aero-primary);
+        }
+        
+        .tool-tab.active {
+            background: linear-gradient(135deg, var(--aero-primary), var(--aero-secondary));
+            border-color: var(--aero-primary);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .calc-section {
+            display: none;
+        }
+        
+        .calc-section.active {
+            display: block;
+        }
+        
+        .calc-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .calc-card h3 {
+            color: var(--aero-primary);
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #374151;
+            font-size: 0.9rem;
+        }
+        
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+        
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--aero-primary);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+        }
+        
+        .input-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 10px;
+        }
+        
+        .btn-calculate {
+            background: linear-gradient(135deg, var(--aero-primary), var(--aero-secondary));
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-calculate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+        }
+        
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .result-item {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid var(--aero-primary);
+        }
+        
+        .result-item.highlight {
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(6, 182, 212, 0.1));
+            border-left-color: var(--cfd-primary);
+        }
+        
+        .result-item.warning {
+            border-left-color: #ef4444;
+        }
+        
+        .result-label {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+        
+        .result-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        
+        .result-unit {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-left: 4px;
+        }
+        
+        .section-title {
+            font-size: 1rem;
+            color: var(--cfd-primary);
+            margin: 20px 0 10px 0;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #e2e8f0;
+            font-weight: 600;
+        }
+        
+        .formula-box {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            margin-top: 15px;
+            line-height: 1.6;
+        }
+        
+        .formula-box strong {
+            color: #38bdf8;
+        }
+        
+        .quick-select {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .quick-btn {
+            padding: 6px 12px;
+            background: #e0f2fe;
+            border: 1px solid #bae6fd;
+            border-radius: 4px;
+            color: #0369a1;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .quick-btn:hover {
+            background: #bae6fd;
+        }
+        
+        .cd-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .cd-table th,
+        .cd-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .cd-table th {
+            background: #f8fafc;
+            color: #475569;
+            font-weight: 600;
+        }
+        
+        .cd-table td {
+            color: #64748b;
+        }
+        
+        .cd-table tr:hover td {
+            background: #f8fafc;
+        }
+        
+        .info-note {
+            background: #fef3c7;
+            border: 1px solid #fcd34d;
+            border-radius: 6px;
+            padding: 12px 15px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #92400e;
+        }
+        
+        .info-note strong {
+            color: #b45309;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🧮 数值仿真工具</h1>
+            <p class="subtitle">空气动力学与CFD计算 - 基于NASA标准大气模型</p>
+            <div class="badges">
+                <span class="badge">🆓 免费使用</span>
+                <span class="badge">⚡ 实时计算</span>
+                <span class="badge">📊 数据可视化</span>
+            </div>
+        </div>
+    </header>
+
+    <nav class="tool-nav">
+        <div class="container">
+            <ul id="toolList">
+                <li><a href="index.html">🏠 首页</a></li>
+                <li><a href="#atmosphere" class="active" data-tool="atmosphere">🌡️ 大气参数</a></li>
+                <li><a href="#yplus" data-tool="yplus">📐 y+ 计算</a></li>
+                <li><a href="#boundary" data-tool="boundary">🌊 附面层</a></li>
+                <li><a href="#draglift" data-tool="draglift">💨 阻力/升力</a></li>
+                <li><a href="#reynolds" data-tool="reynolds">🔄 雷诺数</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- 工具选择标签 -->
+        <div class="tool-tabs">
+            <button class="tool-tab active" onclick="switchTool('atmosphere')">🌡️ 大气参数计算</button>
+            <button class="tool-tab" onclick="switchTool('yplus')">📐 y+ 计算器</button>
+            <button class="tool-tab" onclick="switchTool('boundary')">🌊 附面层计算</button>
+            <button class="tool-tab" onclick="switchTool('draglift')">💨 阻力/升力</button>
+            <button class="tool-tab" onclick="switchTool('reynolds')">🔄 雷诺数</button>
+        </div>
+
+        <!-- 1. 大气参数计算器 -->
+        <section id="atmosphere" class="calc-section active">
+            <div class="calc-card">
+                <h3>🌡️ 大气参数与总温总压计算</h3>
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label>飞行高度</label>
+                        <div class="input-row">
+                            <input type="number" id="atmo-alt" value="12000" min="0" max="100000">
+                            <select id="atmo-alt-unit">
+                                <option value="m">m</option>
+                                <option value="km" selected>km</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>马赫数 Mach</label>
+                        <input type="number" id="atmo-mach" value="2.0" min="0" max="25" step="0.1">
+                    </div>
+                </div>
+                <button class="btn-calculate" onclick="calcAtmosphere()">计算大气参数</button>
+                
+                <div class="quick-select">
+                    <span style="color:#64748b;font-size:0.85rem;margin-right:5px;">快速选择:</span>
+                    <button class="quick-btn" onclick="setQuick('atmo', 0, 0.3)">海平面 M0.3</button>
+                    <button class="quick-btn" onclick="setQuick('atmo', 10, 0.85)">10km 巡航</button>
+                    <button class="quick-btn" onclick="setQuick('atmo', 12, 2.0)">12km M2.0</button>
+                    <button class="quick-btn" onclick="setQuick('atmo', 20, 3.0)">20km M3.0</button>
+                    <button class="quick-btn" onclick="setQuick('atmo', 30, 6.0)">30km M6.0</button>
+                </div>
+
+                <div class="result-grid" id="atmo-results"></div>
+                
+                <div class="formula-box">
+                    <strong>公式说明：</strong><br>
+                    • 总温 T₀ = T × (1 + (γ-1)/2 × M²)<br>
+                    • 总压 P₀ = P × (1 + (γ-1)/2 × M²)^(γ/(γ-1))<br>
+                    • 动压 q = 0.5 × ρ × V²<br>
+                    • 声速 a = √(γ × R × T)<br>
+                    其中 γ=1.4, R=287.052 J/(kg·K)
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. y+ 计算器 -->
+        <section id="yplus" class="calc-section">
+            <div class="calc-card">
+                <h3>📐 y+ 计算器 (边界层网格设计)</h3>
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label>飞行高度</label>
+                        <div class="input-row">
+                            <input type="number" id="yplus-alt" value="12000" min="0" max="100000">
+                            <select id="yplus-alt-unit">
+                                <option value="m">m</option>
+                                <option value="km" selected>km</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>马赫数</label>
+                        <input type="number" id="yplus-mach" value="2.0" min="0" max="25" step="0.1">
+                    </div>
+                    <div class="input-group">
+                        <label>特征长度/弦长 (m)</label>
+                        <input type="number" id="yplus-chord" value="1.0" min="0.01">
+                    </div>
+                </div>
+                <button class="btn-calculate" onclick="calcYPlus()">计算 y+</button>
+
+                <div class="result-grid" id="yplus-results"></div>
+
+                <div class="section-title">常用物体阻力系数参考</div>
+                <table class="cd-table">
+                    <tr><th>湍流模型</th><th>推荐 y+</th><th>说明</th></tr>
+                    <tr><td>k-ω SST</td><td>≈ 1</td><td>需要近壁精细网格</td></tr>
+                    <tr><td>Standard k-ε</td><td>≈ 30</td><td>标准壁面函数</td></tr>
+                    <tr><td>LES/DNS</td><td>≈ 1</td><td>直接求解</td></tr>
+                </table>
+                
+                <div class="formula-box">
+                    <strong>公式：</strong><br>
+                    y+ = ρ × u* × y / μ = u* × y / ν<br>
+                    u* = √(τw/ρ)， τw = 0.5 × Cf × ρ × V²<br>
+                    第一层网格: Δy = y+ × ν / u*<br>
+                    Cf = 0.074 × Re^(-0.2) (Schlichting)
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. 附面层计算 -->
+        <section id="boundary" class="calc-section">
+            <div class="calc-card">
+                <h3>🌊 附面层厚度计算器</h3>
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label>飞行高度 (km)</label>
+                        <input type="number" id="bl-alt" value="12" min="0" max="100">
+                    </div>
+                    <div class="input-group">
+                        <label>马赫数</label>
+                        <input type="number" id="bl-mach" value="2.0" min="0" max="25">
+                    </div>
+                    <div class="input-group">
+                        <label>沿程位置 x (m)</label>
+                        <input type="number" id="bl-x" value="1.0" min="0.01">
+                    </div>
+                </div>
+                <button class="btn-calculate" onclick="calcBL()">计算附面层</button>
+
+                <div class="result-grid" id="bl-results"></div>
+
+                <div class="info-note">
+                    <strong>💡 提示：</strong>形状因子 H = δ*/θ 可用于判断流态：<br>
+                    • H ≈ 2.0-2.5 → 层流<br>
+                    • H ≈ 1.2-1.5 → 湍流
+                </div>
+                
+                <div class="formula-box">
+                    <strong>公式：</strong><br>
+                    湍流: δ = 0.37 × x / Re_x^(1/5)<br>
+                    δ* = 0.046 × x / Re_x^(1/5)<br>
+                    θ = 0.036 × x / Re_x^(1/5)<br>
+                    Re_x = ρ × V × x / μ
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. 阻力/升力计算 -->
+        <section id="draglift" class="calc-section">
+            <div class="calc-card">
+                <h3>💨 阻力与升力计算器</h3>
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label>飞行高度 (km)</label>
+                        <input type="number" id="dl-alt" value="12" min="0" max="100">
+                    </div>
+                    <div class="input-group">
+                        <label>马赫数</label>
+                        <input type="number" id="dl-mach" value="2.0" min="0" max="25">
+                    </div>
+                    <div class="input-group">
+                        <label>参考面积 (m²)</label>
+                        <input type="number" id="dl-area" value="1.0" min="0.01">
+                    </div>
+                    <div class="input-group">
+                        <label>迎角 α (度)</label>
+                        <input type="number" id="dl-alpha" value="10" min="-20" max="90">
+                    </div>
+                </div>
+                <button class="btn-calculate" onclick="calcDragLift()">计算阻力和升力</button>
+
+                <div class="result-grid" id="dl-results"></div>
+
+                <div class="section-title">常用阻力系数参考</div>
+                <table class="cd-table">
+                    <tr><th>物体类型</th><th>Cd</th><th>典型应用</th></tr>
+                    <tr><td>球体</td><td>0.47</td><td>标准参考</td></tr>
+                    <tr><td>圆柱</td><td>0.99</td><td>钝体</td></tr>
+                    <tr><td>翼型 0°</td><td>0.006</td><td>平板</td></tr>
+                    <tr><td>翼型 10°</td><td>0.08</td><td>增迎角</td></tr>
+                    <tr><td>汽车</td><td>0.30</td><td>地面车辆</td></tr>
+                    <tr><td>卡车</td><td>0.70</td><td>商用车辆</td></tr>
+                </table>
+                
+                <div class="formula-box">
+                    <strong>公式：</strong><br>
+                    阻力 D = Cd × q × A<br>
+                    升力 L = Cl × q × A<br>
+                    Cl ≈ 2π × α (rad)，薄翼理论<br>
+                    q = 0.5 × ρ × V²
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. 雷诺数计算 -->
+        <section id="reynolds" class="calc-section">
+            <div class="calc-card">
+                <h3>🔄 雷诺数计算器</h3>
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label>飞行高度 (km)</label>
+                        <input type="number" id="re-alt" value="12" min="0" max="100">
+                    </div>
+                    <div class="input-group">
+                        <label>马赫数</label>
+                        <input type="number" id="re-mach" value="2.0" min="0" max="25">
+                    </div>
+                    <div class="input-group">
+                        <label>特征长度 (m)</label>
+                        <input type="number" id="re-length" value="1.0" min="0.01">
+                    </div>
+                </div>
+                <button class="btn-calculate" onclick="calcRe()">计算雷诺数</button>
+
+                <div class="result-grid" id="re-results"></div>
+
+                <div class="info-note">
+                    <strong>💡 流态判断：</strong><br>
+                    • 平板: Re_crit ≈ 5×10⁵<br>
+                    • 球体/圆柱: Re_crit ≈ 2×10⁵<br>
+                    • Re > Re_crit → 湍流
+                </div>
+                
+                <div class="formula-box">
+                    <strong>公式：</strong><br>
+                    Re = ρ × V × L / μ = V × L / ν
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>© 2025 科研工具集 - 数值仿真模块 | 基于 NASA US Standard Atmosphere 1976</p>
+            <p class="footer-links">
+                <a href="index.html">返回首页</a> | 
+                <a href="#">使用帮助</a> | 
+                <a href="#">反馈建议</a>
+            </p>
+        </div>
+    </footer>
+
+    <script src="js/cfd-tools.js"></script>
+</body>
+</html>
