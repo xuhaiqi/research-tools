@@ -1,35 +1,142 @@
 // 科研工具集 - JavaScript
 
-// ==================== 导航功能 ====================
+// ==================== 分类与工具导航 ====================
 document.addEventListener('DOMContentLoaded', function() {
-    // 工具导航点击
-    // Only intercept in-page tool tabs. Links to separate pages, such as
-    // cfd.html, must keep their normal browser navigation behavior.
-    const toolLinks = document.querySelectorAll('#toolList a[href^="#"][data-tool]');
-    const toolSections = document.querySelectorAll('.tool-section');
-    
-    toolLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const toolId = this.dataset.tool;
-            
-            // 更新导航状态
-            toolLinks.forEach(l => l.classList.remove('active'));
-            this.classList.add('active');
-            
-            // 显示对应工具
-            toolSections.forEach(section => {
-                section.classList.remove('active');
-                if (section.id === toolId) {
-                    section.classList.add('active');
-                }
-            });
-            
-            // 滚动到顶部
-            window.scrollTo({ top: 200, behavior: 'smooth' });
+    const catalog = window.RESEARCH_TOOL_CATALOG;
+    const categoryList = document.getElementById('categoryList');
+    const categorySection = document.getElementById('tool-home');
+    const categoryTitle = document.getElementById('category-title');
+    const categoryDescription = document.getElementById('category-description');
+    const toolCards = document.getElementById('toolCards');
+    const toolSections = [...document.querySelectorAll('.tool-section')];
+
+    if (!catalog || !categoryList || !categorySection || !toolCards) {
+        console.error('工具目录加载失败。');
+        return;
+    }
+
+    const categoryMap = new Map(catalog.categories.map(category => [category.id, category]));
+    const toolMap = new Map(catalog.tools.map(tool => [tool.id, tool]));
+
+    function setActiveCategory(categoryId) {
+        categoryList.querySelectorAll('a').forEach(link => {
+            link.classList.toggle('active', link.dataset.category === categoryId);
         });
+    }
+
+    function hideToolSections() {
+        toolSections.forEach(section => section.classList.remove('active'));
+    }
+
+    function createToolCard(tool) {
+        const card = document.createElement('a');
+        const target = tool.type === 'page' ? tool.target : `#${tool.id}`;
+        card.className = 'tool-card';
+        card.href = target;
+        card.dataset.tool = tool.id;
+        if (tool.type === 'page') card.dataset.page = 'true';
+
+        const icon = document.createElement('span');
+        icon.className = 'tool-card-icon';
+        icon.textContent = tool.icon;
+        const content = document.createElement('span');
+        content.className = 'tool-card-content';
+        const name = document.createElement('strong');
+        name.textContent = tool.name;
+        const description = document.createElement('span');
+        description.textContent = tool.description;
+        const arrow = document.createElement('span');
+        arrow.className = 'tool-card-arrow';
+        arrow.textContent = tool.type === 'page' ? '打开页面 ↗' : '进入工具 →';
+        content.append(name, description, arrow);
+        card.append(icon, content);
+        return card;
+    }
+
+    function showCategory(categoryId, updateUrl = true) {
+        const category = categoryMap.get(categoryId);
+        const visibleTools = category
+            ? catalog.tools.filter(tool => tool.category === categoryId)
+            : catalog.tools;
+
+        hideToolSections();
+        categorySection.classList.add('active');
+        categoryTitle.textContent = category ? `${category.icon} ${category.name}` : '全部工具';
+        categoryDescription.textContent = category
+            ? category.description
+            : '按研究任务选择分类，再进入具体工具。';
+        toolCards.replaceChildren(...visibleTools.map(createToolCard));
+        setActiveCategory(category ? category.id : 'all');
+
+        if (updateUrl) history.pushState(null, '', category ? `#category-${category.id}` : '#tools');
+    }
+
+    function openTool(toolId, updateUrl = true) {
+        const tool = toolMap.get(toolId);
+        if (!tool) {
+            showCategory('all', updateUrl);
+            return;
+        }
+        if (tool.type === 'page') {
+            location.href = tool.target;
+            return;
+        }
+
+        categorySection.classList.remove('active');
+        hideToolSections();
+        const section = document.getElementById(tool.id);
+        if (!section) {
+            showCategory(tool.category, updateUrl);
+            return;
+        }
+        section.classList.add('active');
+        setActiveCategory(tool.category);
+        if (updateUrl) history.pushState(null, '', `#${tool.id}`);
+    }
+
+    function resolveLocation() {
+        const hash = decodeURIComponent(location.hash.slice(1));
+        if (!hash || hash === 'tools') {
+            showCategory('all', false);
+        } else if (hash.startsWith('category-')) {
+            showCategory(hash.slice('category-'.length), false);
+        } else {
+            openTool(hash, false);
+        }
+    }
+
+    const allItem = document.createElement('li');
+    allItem.innerHTML = '<a href="#tools" data-category="all">🏠 全部工具</a>';
+    categoryList.append(allItem);
+    catalog.categories.forEach(category => {
+        const item = document.createElement('li');
+        const link = document.createElement('a');
+        link.href = `#category-${category.id}`;
+        link.dataset.category = category.id;
+        link.textContent = `${category.icon} ${category.name}`;
+        item.append(link);
+        categoryList.append(item);
     });
-    
+
+    categoryList.addEventListener('click', event => {
+        const link = event.target.closest('a[data-category]');
+        if (!link) return;
+        event.preventDefault();
+        showCategory(link.dataset.category);
+    });
+
+    toolCards.addEventListener('click', event => {
+        const card = event.target.closest('a[data-tool]');
+        if (!card || card.dataset.page === 'true') return;
+        event.preventDefault();
+        openTool(card.dataset.tool);
+        window.scrollTo({ top: categoryList.closest('nav').offsetTop, behavior: 'smooth' });
+    });
+
+    window.addEventListener('popstate', resolveLocation);
+    window.researchToolsNavigation = { showCategory, openTool };
+    resolveLocation();
+
     // 初始化单位换算选项
     updateUnitOptions();
 });

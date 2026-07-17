@@ -1,0 +1,243 @@
+/* DOI 引用工具专属样式。所有规则限定在 .doi-tool 内，避免影响其他工具。 */
+.doi-tool .doi-intro {
+    margin: -8px 0 22px;
+    color: var(--text-light);
+}
+
+.doi-tool .doi-card {
+    margin-bottom: 20px;
+    padding: 22px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: #fff;
+}
+
+.doi-tool .doi-card:last-of-type {
+    margin-bottom: 0;
+}
+
+.doi-tool .doi-card h3 {
+    margin-bottom: 14px;
+    font-size: 1.12rem;
+}
+
+.doi-tool .doi-input-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+}
+
+.doi-tool #doi-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font: inherit;
+    outline: none;
+}
+
+.doi-tool #doi-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.doi-tool button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+    transform: none;
+}
+
+.doi-tool .doi-helper-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    align-items: center;
+    margin-top: 10px;
+    color: var(--text-light);
+    font-size: 0.88rem;
+}
+
+.doi-tool .doi-text-button {
+    padding: 0;
+    color: var(--primary);
+    border: 0;
+    background: none;
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.doi-tool #doi-status {
+    min-height: 26px;
+    margin-top: 12px;
+    font-size: 0.9rem;
+}
+
+.doi-tool .status-loading { color: var(--primary); }
+.doi-tool .status-error { color: var(--danger); }
+.doi-tool .status-success { color: var(--success); }
+.doi-tool .hidden { display: none !important; }
+
+.doi-tool .doi-metadata-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 20px;
+}
+
+.doi-tool .doi-metadata-item {
+    min-width: 0;
+}
+
+.doi-tool .doi-metadata-item.wide {
+    grid-column: 1 / -1;
+}
+
+.doi-tool .doi-metadata-label {
+    display: block;
+    color: var(--text-light);
+    font-size: 0.82rem;
+}
+
+.doi-tool .doi-metadata-value {
+    overflow-wrap: anywhere;
+    font-weight: 600;
+}
+
+.doi-tool .doi-metadata-value a,
+.doi-tool .doi-guide a,
+.doi-tool summary {
+    color: var(--primary);
+}
+
+.doi-tool details {
+    margin-top: 16px;
+}
+
+.doi-tool summary {
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.doi-tool #doi-raw-json {
+    max-height: 360px;
+    overflow: auto;
+    margin-top: 10px;
+    padding: 14px;
+    border-radius: var(--radius);
+    color: #dce7ff;
+    background: #172033;
+    font: 12px/1.55 Consolas, monospace;
+    white-space: pre-wrap;
+}
+
+.doi-tool .doi-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.doi-tool .doi-toolbar h3 {
+    margin-bottom: 0;
+}
+
+.doi-tool .doi-toolbar-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.doi-tool .btn-small {
+    padding: 7px 12px;
+    font-size: 0.86rem;
+}
+
+.doi-tool .doi-citation-list {
+    display: grid;
+    gap: 14px;
+}
+
+.doi-tool .doi-citation-item {
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.doi-tool .doi-citation-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 13px;
+    background: #f4f6fb;
+}
+
+.doi-tool .doi-citation-title {
+    font-weight: 700;
+}
+
+.doi-tool .doi-citation-output {
+    min-height: 70px;
+    margin: 0;
+    padding: 14px;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.doi-tool .doi-citation-output.code {
+    color: #dce7ff;
+    background: #172033;
+    font: 13px/1.55 Consolas, "Courier New", monospace;
+}
+
+.doi-tool .doi-notice {
+    margin-top: 16px;
+    padding: 12px 14px;
+    color: #6f5310;
+    border-left: 4px solid #f59f00;
+    border-radius: 6px;
+    background: #fff8db;
+    font-size: 0.88rem;
+}
+
+.doi-tool .doi-guide ol {
+    padding-left: 22px;
+    margin-bottom: 10px;
+}
+
+.doi-tool .doi-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 26px;
+    z-index: 150;
+    padding: 10px 18px;
+    border-radius: 999px;
+    color: #fff;
+    background: rgba(21, 31, 49, 0.94);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 12px);
+    transition: 0.2s;
+}
+
+.doi-tool .doi-toast.show {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+@media (max-width: 680px) {
+    .doi-tool .doi-card {
+        padding: 16px;
+    }
+
+    .doi-tool .doi-input-row,
+    .doi-tool .doi-metadata-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .doi-tool .doi-metadata-item.wide {
+        grid-column: auto;
+    }
+}

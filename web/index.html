@@ -5,8 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>科研工具集 - 研究生/博士生必备工具箱</title>
-    <meta name="description" content="免费在线科研工具箱：文本去空格、科学计数法转换、单位换算、繁简转换、字符计数等">
+    <meta name="description" content="免费在线科研工具箱：文本处理、数值与单位换算、数据格式化、DOI 引用生成和 CFD 辅助计算。">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/doi-citation.css">
     <!-- 广告位：顶部 -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4686940386233751" crossorigin="anonymous"></script>
 </head>
@@ -25,22 +26,22 @@
 
     <nav class="tool-nav">
         <div class="container">
-            <ul id="toolList">
-                <li><a href="#trim" class="active" data-tool="trim">📝 文本去空格</a></li>
-                <li><a href="#sci" data-tool="sci">🔢 科学计数法</a></li>
-                <li><a href="#unit" data-tool="unit">⚖️ 单位换算</a></li>
-                <li><a href="#s2t" data-tool="s2t">繁简转换</a></li>
-                <li><a href="#random" data-tool="random">🎲 随机数</a></li>
-                <li><a href="#count" data-tool="count">📊 字符计数</a></li>
-                <li><a href="#line" data-tool="line">🔢 行号处理</a></li>
-                <li><a href="#sort" data-tool="sort">↕️ 文本排序</a></li>
-                <li><a href="#json" data-tool="json">{} JSON格式化</a></li>
-                <li><a href="cfd.html">🧮 数值仿真</a></li>
-            </ul>
+            <ul id="categoryList" aria-label="工具分类"></ul>
         </div>
     </nav>
 
     <main class="container">
+        <section id="tool-home" class="category-section active" aria-labelledby="category-title">
+            <div class="category-heading">
+                <div>
+                    <p class="eyebrow">工具目录</p>
+                    <h2 id="category-title">全部工具</h2>
+                </div>
+                <p id="category-description">按研究任务选择分类，再进入具体工具。</p>
+            </div>
+            <div id="toolCards" class="tool-card-grid"></div>
+        </section>
+
         <!-- 工具1: 文本去空格 -->
         <section id="trim" class="tool-section active">
             <h2>📝 文本去空格工具</h2>
@@ -361,6 +362,64 @@
             </div>
             <div class="json-status" id="json-status"></div>
         </section>
+
+        <!-- 工具10: DOI 引用生成器 -->
+        <section id="doi-citation" class="tool-section doi-tool" aria-labelledby="doi-tool-title">
+            <h2 id="doi-tool-title">📚 DOI / 论文引用生成器</h2>
+            <p class="doi-intro">通过 DOI 查询论文元数据，并生成 APA、IEEE、GB/T 7714、MLA、Chicago、BibTeX 和 RIS 引用。</p>
+
+            <div class="doi-card" aria-labelledby="doi-query-title">
+                <h3 id="doi-query-title">输入 DOI</h3>
+                <form id="doi-form">
+                    <div class="doi-input-row">
+                        <input id="doi-input" type="text" autocomplete="off" spellcheck="false"
+                               placeholder="例如：10.1038/s41586-020-2649-2" aria-label="论文 DOI">
+                        <button id="doi-query-button" class="btn-primary" type="submit">查询并生成</button>
+                    </div>
+                </form>
+                <div class="doi-helper-row">
+                    <span>支持 DOI、doi.org 链接和带有 doi: 前缀的文本</span>
+                    <button id="doi-example-button" class="doi-text-button" type="button">填入示例</button>
+                    <button id="doi-clear-button" class="doi-text-button" type="button">清空</button>
+                </div>
+                <div id="doi-status" role="status" aria-live="polite"></div>
+            </div>
+
+            <div id="doi-metadata-card" class="doi-card hidden" aria-labelledby="doi-metadata-title">
+                <h3 id="doi-metadata-title">论文信息</h3>
+                <div id="doi-metadata-grid" class="doi-metadata-grid"></div>
+                <details>
+                    <summary>查看 Crossref 原始 JSON</summary>
+                    <pre id="doi-raw-json"></pre>
+                </details>
+            </div>
+
+            <div id="doi-result-card" class="doi-card hidden" aria-labelledby="doi-result-title">
+                <div class="doi-toolbar">
+                    <h3 id="doi-result-title">引用结果</h3>
+                    <div class="doi-toolbar-actions">
+                        <button id="doi-copy-all-button" class="btn-secondary btn-small" type="button">复制全部</button>
+                        <button id="doi-download-txt-button" class="btn-secondary btn-small" type="button">下载 TXT</button>
+                        <button id="doi-download-bib-button" class="btn-secondary btn-small" type="button">下载 BibTeX</button>
+                        <button id="doi-download-ris-button" class="btn-secondary btn-small" type="button">下载 RIS</button>
+                    </div>
+                </div>
+                <div id="doi-citation-list" class="doi-citation-list"></div>
+                <p class="doi-notice">自动生成的引用可能受到源数据完整性和期刊特殊规则影响。提交论文前，请对照学校、期刊或出版机构的格式要求复核。</p>
+            </div>
+
+            <div class="doi-card doi-guide">
+                <h3>使用说明与数据来源</h3>
+                <ol>
+                    <li>输入论文 DOI 或完整的 doi.org 链接。</li>
+                    <li>工具通过 Crossref 公共接口查询作者、标题、期刊、年份等公开元数据。</li>
+                    <li>复制单项引用，或下载 BibTeX、RIS 文件导入文献管理软件。</li>
+                </ol>
+                <p>本站不会保存你输入的 DOI。元数据来源：<a href="https://www.crossref.org/documentation/retrieve-metadata/rest-api/" target="_blank" rel="noopener noreferrer">Crossref REST API</a>。</p>
+            </div>
+
+            <div id="doi-toast" class="doi-toast" role="status" aria-live="polite"></div>
+        </section>
     </main>
 
     <footer>
@@ -374,6 +433,8 @@
         </div>
     </footer>
 
+    <script src="js/tool-catalog.js"></script>
     <script src="js/tools.js"></script>
+    <script src="js/doi-citation.js"></script>
 </body>
 </html>

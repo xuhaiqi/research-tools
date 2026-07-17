@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-adsense-account" content="ca-pub-4686940386233751">
+    <meta name="description" content="免费 DOI 论文引用生成器：查询 Crossref 元数据并生成 APA、IEEE、GB/T 7714、MLA、Chicago、BibTeX 和 RIS 引用。">
+    <title>DOI 论文引用生成器 | 科研工具集</title>
+    <link rel="canonical" href="index.html#doi-citation">
+    <script>
+        // 保留旧地址兼容性；禁用 JavaScript 时，本页原有功能仍可使用。
+        (function () {
+            const target = new URL('index.html', location.href);
+            const doi = new URL(location.href).searchParams.get('doi');
+            if (doi) target.searchParams.set('doi', doi);
+            target.hash = 'doi-citation';
+            location.replace(target);
+        }());
+    </script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4686940386233751" crossorigin="anonymous"></script>
+    <style>
+        :root {
+            --primary: #5b6ee1;
+            --primary-dark: #4054c7;
+            --secondary: #7c4dba;
+            --ink: #1f2937;
+            --muted: #64748b;
+            --line: #dbe3ee;
+            --panel: #ffffff;
+            --background: #f4f7fb;
+            --success: #087f5b;
+            --danger: #c92a2a;
+            --code: #172033;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            color: var(--ink);
+            background: var(--background);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+            line-height: 1.65;
+        }
+
+        header {
+            padding: 44px 20px 38px;
+            color: #fff;
+            text-align: center;
+            background: linear-gradient(135deg, #6376e5, #7549ac);
+        }
+
+        header h1 { margin: 0 0 8px; font-size: clamp(28px, 4vw, 42px); }
+        header p { margin: 0; color: rgba(255,255,255,.88); }
+
+        .container { width: min(1080px, calc(100% - 32px)); margin: 0 auto; }
+
+        .back-link {
+            display: inline-flex;
+            margin-bottom: 14px;
+            color: rgba(255,255,255,.9);
+            text-decoration: none;
+        }
+
+        main { padding: 28px 0 48px; }
+
+        .card {
+            margin-bottom: 22px;
+            padding: 24px;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            background: var(--panel);
+            box-shadow: 0 8px 28px rgba(30, 45, 80, .07);
+        }
+
+        .card h2 { margin: 0 0 15px; font-size: 21px; }
+
+        .input-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; }
+
+        input, button, select { font: inherit; }
+
+        #doiInput {
+            width: 100%;
+            padding: 13px 15px;
+            border: 1px solid #b9c5d7;
+            border-radius: 10px;
+            outline: none;
+            transition: .2s border-color, .2s box-shadow;
+        }
+
+        #doiInput:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(91, 110, 225, .13);
+        }
+
+        button {
+            border: 0;
+            border-radius: 10px;
+            padding: 11px 17px;
+            cursor: pointer;
+            transition: .18s transform, .18s background, .18s opacity;
+        }
+
+        button:hover { transform: translateY(-1px); }
+        button:disabled { cursor: not-allowed; opacity: .55; transform: none; }
+
+        .btn-primary { color: #fff; background: var(--primary); font-weight: 650; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-secondary { color: #34425a; background: #eef2f8; }
+        .btn-small { padding: 7px 12px; font-size: 14px; }
+
+        .helper-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 16px;
+            align-items: center;
+            margin-top: 11px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .text-button {
+            padding: 0;
+            color: var(--primary-dark);
+            background: none;
+            text-decoration: underline;
+        }
+
+        #status { min-height: 26px; margin-top: 13px; font-size: 14px; }
+        .status-loading { color: var(--primary-dark); }
+        .status-error { color: var(--danger); }
+        .status-success { color: var(--success); }
+
+        .hidden { display: none !important; }
+
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px 20px;
+        }
+
+        .metadata-item { min-width: 0; }
+        .metadata-item.wide { grid-column: 1 / -1; }
+        .metadata-label { display: block; color: var(--muted); font-size: 13px; }
+        .metadata-value { overflow-wrap: anywhere; font-weight: 550; }
+        .metadata-value a { color: var(--primary-dark); }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .toolbar-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+        .citation-list { display: grid; gap: 14px; }
+
+        .citation-item {
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+        }
+
+        .citation-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 13px;
+            background: #f4f6fb;
+        }
+
+        .citation-title { font-weight: 700; }
+        .citation-output {
+            min-height: 70px;
+            margin: 0;
+            padding: 14px;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
+        }
+
+        .citation-output.code {
+            color: #dce7ff;
+            background: var(--code);
+            font: 13px/1.55 Consolas, "Courier New", monospace;
+        }
+
+        .notice {
+            padding: 12px 14px;
+            border-left: 4px solid #f59f00;
+            border-radius: 6px;
+            color: #6f5310;
+            background: #fff8db;
+            font-size: 14px;
+        }
+
+        details { margin-top: 16px; }
+        summary { cursor: pointer; color: var(--primary-dark); font-weight: 650; }
+
+        #rawJson {
+            max-height: 360px;
+            overflow: auto;
+            padding: 14px;
+            border-radius: 10px;
+            color: #dce7ff;
+            background: var(--code);
+            font: 12px/1.55 Consolas, monospace;
+            white-space: pre-wrap;
+        }
+
+        .guide ol { padding-left: 22px; }
+        .guide a { color: var(--primary-dark); }
+
+        footer {
+            padding: 27px 16px;
+            color: #d7deee;
+            text-align: center;
+            background: #1d293d;
+        }
+
+        footer a { color: #fff; }
+
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: 26px;
+            z-index: 10;
+            padding: 10px 18px;
+            border-radius: 999px;
+            color: #fff;
+            background: rgba(21, 31, 49, .94);
+            opacity: 0;
+            pointer-events: none;
+            transform: translate(-50%, 12px);
+            transition: .2s;
+        }
+
+        .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+        @media (max-width: 680px) {
+            header { padding-top: 30px; }
+            .input-row { grid-template-columns: 1fr; }
+            .metadata-grid { grid-template-columns: 1fr; }
+            .metadata-item.wide { grid-column: auto; }
+            .card { padding: 18px; border-radius: 12px; }
+            .citation-head { align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <a class="back-link" href="index.html">← 返回科研工具集</a>
+            <h1>DOI / 论文引用生成器</h1>
+            <p>通过 DOI 查询论文元数据，并生成常用参考文献格式</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="card" aria-labelledby="queryTitle">
+            <h2 id="queryTitle">输入 DOI</h2>
+            <form id="doiForm">
+                <div class="input-row">
+                    <input id="doiInput" type="text" autocomplete="off" spellcheck="false"
+                           placeholder="例如：10.1038/s41586-020-2649-2" aria-label="论文 DOI">
+                    <button id="queryButton" class="btn-primary" type="submit">查询并生成</button>
+                </div>
+            </form>
+            <div class="helper-row">
+                <span>支持 DOI、doi.org 链接和带有 doi: 前缀的文本</span>
+                <button id="exampleButton" class="text-button" type="button">填入示例</button>
+                <button id="clearButton" class="text-button" type="button">清空</button>
+            </div>
+            <div id="status" role="status" aria-live="polite"></div>
+        </section>
+
+        <section id="metadataCard" class="card hidden" aria-labelledby="metadataTitle">
+            <h2 id="metadataTitle">论文信息</h2>
+            <div id="metadataGrid" class="metadata-grid"></div>
+            <details>
+                <summary>查看 Crossref 原始 JSON</summary>
+                <pre id="rawJson"></pre>
+            </details>
+        </section>
+
+        <section id="resultCard" class="card hidden" aria-labelledby="resultTitle">
+            <div class="toolbar">
+                <h2 id="resultTitle">引用结果</h2>
+                <div class="toolbar-actions">
+                    <button id="copyAllButton" class="btn-secondary btn-small" type="button">复制全部</button>
+                    <button id="downloadTxtButton" class="btn-secondary btn-small" type="button">下载 TXT</button>
+                    <button id="downloadBibButton" class="btn-secondary btn-small" type="button">下载 BibTeX</button>
+                    <button id="downloadRisButton" class="btn-secondary btn-small" type="button">下载 RIS</button>
+                </div>
+            </div>
+            <div id="citationList" class="citation-list"></div>
+            <p class="notice">自动生成的引用可能受到源数据完整性和期刊特殊规则影响。提交论文前，请对照学校、期刊或出版机构的格式要求复核。</p>
+        </section>
+
+        <section class="card guide">
+            <h2>使用说明与数据来源</h2>
+            <ol>
+                <li>输入论文 DOI 或完整的 doi.org 链接。</li>
+                <li>工具通过 Crossref 公共接口查询作者、标题、期刊、年份等公开元数据。</li>
+                <li>选择复制单项引用，或下载 BibTeX、RIS 文件导入文献管理软件。</li>
+            </ol>
+            <p>本工具不会在本站保存你输入的 DOI。元数据来源：<a href="https://www.crossref.org/documentation/retrieve-metadata/rest-api/" target="_blank" rel="noopener noreferrer">Crossref REST API</a>。</p>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2026 科研工具集 · <a href="https://github.com/xuhaiqi/research-tools" target="_blank" rel="noopener noreferrer">GitHub</a></p>
+    </footer>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script>
+        const form = document.getElementById('doiForm');
+        const input = document.getElementById('doiInput');
+        const queryButton = document.getElementById('queryButton');
+        const statusBox = document.getElementById('status');
+        const metadataCard = document.getElementById('metadataCard');
+        const resultCard = document.getElementById('resultCard');
+        const metadataGrid = document.getElementById('metadataGrid');
+        const citationList = document.getElementById('citationList');
+        const rawJson = document.getElementById('rawJson');
+        const toast = document.getElementById('toast');
+        let currentResult = null;
+        let toastTimer = null;
+
+        const styleNames = {
+            apa: 'APA 7th',
+            ieee: 'IEEE',
+            gbt: 'GB/T 7714',
+            mla: 'MLA 9th',
+            chicago: 'Chicago',
+            bibtex: 'BibTeX',
+            ris: 'RIS'
+        };
+
+        function normalizeDoi(value) {
+            let doi = value.trim();
+            doi = doi.replace(/^doi\s*:\s*/i, '');
+            doi = doi.replace(/^https?:\/\/(?:dx\.)?doi\.org\//i, '');
+            doi = doi.replace(/[\s.,;]+$/g, '');
+            return doi;
+        }
+
+        function isValidDoi(doi) {
+            return /^10\.\d{4,9}\/\S+$/i.test(doi);
+        }
+
+        function clean(value) {
+            if (value == null) return '';
+            const holder = document.createElement('div');
+            holder.innerHTML = String(value);
+            return (holder.textContent || '').replace(/\s+/g, ' ').trim();
+        }
+
+        function first(value) {
+            return Array.isArray(value) ? clean(value[0]) : clean(value);
+        }
+
+        function getYear(item) {
+            const sources = [item.published, item['published-print'], item['published-online'], item.issued, item.created];
+            for (const source of sources) {
+                const year = source && source['date-parts'] && source['date-parts'][0] && source['date-parts'][0][0];
+                if (year) return String(year);
+            }
+            return 'n.d.';
+        }
+
+        function getDateParts(item) {
+            const sources = [item.published, item['published-print'], item['published-online'], item.issued];
+            for (const source of sources) {
+                if (source && source['date-parts'] && source['date-parts'][0]) return source['date-parts'][0];
+            }
+            return [];
+        }
+
+        function authors(item) {
+            return Array.isArray(item.author) ? item.author.map(author => ({
+                family: clean(author.family) || clean(author.name) || 'Unknown',
+                given: clean(author.given)
+            })) : [];
+        }
+
+        function initials(given, spaced = false) {
+            const values = clean(given).split(/[\s-]+/).filter(Boolean).map(part => {
+                const match = part.match(/[\p{L}\p{N}]/u);
+                return match ? match[0].toUpperCase() + '.' : '';
+            }).filter(Boolean);
+            return values.join(spaced ? ' ' : '');
+        }
+
+        function joinWithAnd(values, andWord = '&') {
+            if (!values.length) return '';
+            if (values.length === 1) return values[0];
+            if (values.length === 2) return values[0] + ' ' + andWord + ' ' + values[1];
+            return values.slice(0, -1).join(', ') + ', ' + andWord + ' ' + values.at(-1);
+        }
+
+        function apaAuthors(list) {
+            if (!list.length) return 'Unknown author';
+            const formatted = list.slice(0, 20).map(a => `${a.family}, ${initials(a.given, true)}`.trim());
+            if (list.length > 20) return formatted.slice(0, 19).join(', ') + ', … ' + formatted.at(-1);
+            return joinWithAnd(formatted, '&');
+        }
+
+        function ieeeAuthors(list) {
+            if (!list.length) return 'Unknown author';
+            const formatted = list.map(a => `${initials(a.given, true)} ${a.family}`.trim());
+            if (formatted.length > 6) return formatted[0] + ' et al.';
+            return joinWithAnd(formatted, 'and');
+        }
+
+        function gbtAuthors(list) {
+            if (!list.length) return '佚名';
+            const formatted = list.slice(0, 3).map(a => `${a.family.toUpperCase()} ${initials(a.given)}`.trim());
+            return formatted.join(', ') + (list.length > 3 ? ', et al.' : '');
+        }
+
+        function mlaAuthors(list) {
+            if (!list.length) return 'Unknown author';
+            const firstAuthor = `${list[0].family}, ${list[0].given}`.replace(/,\s*$/, '');
+            if (list.length === 1) return firstAuthor;
+            if (list.length === 2) return `${firstAuthor}, and ${list[1].given} ${list[1].family}`.trim();
+            return `${firstAuthor}, et al.`;
+        }
+
+        function chicagoAuthors(list) {
+            if (!list.length) return 'Unknown author';
+            const formatted = list.map((a, index) => index === 0
+                ? `${a.family}, ${a.given}`.replace(/,\s*$/, '')
+                : `${a.given} ${a.family}`.trim());
+            if (formatted.length > 10) return formatted.slice(0, 7).join(', ') + ', et al.';
+            return joinWithAnd(formatted, 'and');
+        }
+
+        function pageInfo(item) {
+            return clean(item.page || item['article-number']);
+        }
+
+        function issueInfo(item) {
+            const volume = clean(item.volume);
+            const issue = clean(item.issue);
+            if (volume && issue) return `${volume}(${issue})`;
+            return volume || (issue ? `(${issue})` : '');
+        }
+
+        function sentence(value) {
+            const text = clean(value);
+            return text && !/[.!?。！？]$/.test(text) ? text + '.' : text;
+        }
+
+        function buildCitations(item, doi) {
+            const list = authors(item);
+            const title = first(item.title) || 'Untitled';
+            const journal = first(item['container-title']);
+            const publisher = clean(item.publisher);
+            const year = getYear(item);
+            const volumeIssue = issueInfo(item);
+            const pages = pageInfo(item);
+            const url = `https://doi.org/${doi}`;
+            const typeMarker = item.type === 'book' ? 'M' : (item.type === 'proceedings-article' ? 'C' : 'J');
+
+            const apaTail = [journal ? `<i>${journal}</i>` : '', volumeIssue, pages].filter(Boolean).join(', ');
+            const apa = `${apaAuthors(list)} (${year}). ${sentence(title)} ${apaTail ? apaTail + '. ' : ''}${url}`;
+
+            const ieeeParts = [journal ? `“${title},” <i>${journal}</i>` : `“${title},”`,
+                clean(item.volume) ? `vol. ${clean(item.volume)}` : '',
+                clean(item.issue) ? `no. ${clean(item.issue)}` : '',
+                pages ? `pp. ${pages}` : '', year ? year : '', `doi: ${doi}`].filter(Boolean);
+            const ieee = `${ieeeAuthors(list)}, ${ieeeParts.join(', ')}.`;
+
+            const gbtSource = journal || publisher || '在线文献';
+            const gbtDetails = [year, clean(item.volume), clean(item.issue) ? `(${clean(item.issue)})` : ''].filter(Boolean).join(', ');
+            const gbt = `${gbtAuthors(list)}. ${title}[${typeMarker}]. ${gbtSource}, ${gbtDetails}${pages ? ': ' + pages : ''}. DOI:${doi}.`;
+
+            const mla = `${mlaAuthors(list)}. “${title}.” <i>${journal || publisher || 'Online publication'}</i>${volumeIssue ? ', ' + volumeIssue : ''}, ${year}${pages ? ', pp. ' + pages : ''}. DOI: ${doi}.`;
+
+            const chicago = `${chicagoAuthors(list)}. “${title}.” <i>${journal || publisher || 'Online publication'}</i> ${volumeIssue ? volumeIssue + ' ' : ''}(${year})${pages ? ': ' + pages : ''}. ${url}.`;
+
+            const bibtex = buildBibtex(item, doi, list, title, journal, year, pages);
+            const ris = buildRis(item, doi, list, title, journal, year, pages);
+            return { apa: stripMarkup(apa), ieee: stripMarkup(ieee), gbt, mla: stripMarkup(mla), chicago: stripMarkup(chicago), bibtex, ris };
+        }
+
+        function stripMarkup(value) {
+            const holder = document.createElement('div');
+            holder.innerHTML = value;
+            return holder.textContent || '';
+        }
+
+        function bibEscape(value) {
+            return clean(value).replace(/[{}]/g, match => '\\' + match);
+        }
+
+        function citationKey(list, year, title) {
+            const family = (list[0] && list[0].family || 'unknown').replace(/[^\p{L}\p{N}]/gu, '');
+            const word = clean(title).split(/\s+/).find(part => part.length > 3) || 'work';
+            return (family + year + word).replace(/[^\p{L}\p{N}_-]/gu, '');
+        }
+
+        function buildBibtex(item, doi, list, title, journal, year, pages) {
+            const map = {
+                'book': 'book',
+                'book-chapter': 'incollection',
+                'proceedings-article': 'inproceedings',
+                'dissertation': 'phdthesis',
+                'report': 'techreport'
+            };
+            const type = map[item.type] || 'article';
+            const fields = [
+                ['title', title],
+                ['author', list.map(a => `${a.family}, ${a.given}`.replace(/,\s*$/, '')).join(' and ')],
+                [type === 'article' ? 'journal' : 'booktitle', journal],
+                ['year', year === 'n.d.' ? '' : year],
+                ['volume', clean(item.volume)],
+                ['number', clean(item.issue)],
+                ['pages', pages],
+                ['publisher', clean(item.publisher)],
+                ['doi', doi],
+                ['url', `https://doi.org/${doi}`]
+            ].filter(([, value]) => value);
+            const body = fields.map(([key, value]) => `  ${key} = {${bibEscape(value)}}`).join(',\n');
+            return `@${type}{${citationKey(list, year, title)},\n${body}\n}`;
+        }
+
+        function buildRis(item, doi, list, title, journal, year, pages) {
+            const typeMap = { 'book': 'BOOK', 'book-chapter': 'CHAP', 'proceedings-article': 'CPAPER', 'dissertation': 'THES', 'report': 'RPRT' };
+            const rows = [`TY  - ${typeMap[item.type] || 'JOUR'}`];
+            list.forEach(a => rows.push(`AU  - ${a.family}, ${a.given}`.replace(/,\s*$/, '')));
+            rows.push(`TI  - ${title}`);
+            if (journal) rows.push(`JO  - ${journal}`);
+            if (year !== 'n.d.') rows.push(`PY  - ${year}`);
+            if (item.volume) rows.push(`VL  - ${clean(item.volume)}`);
+            if (item.issue) rows.push(`IS  - ${clean(item.issue)}`);
+            if (pages) {
+                const parts = pages.split('-');
+                rows.push(`SP  - ${parts[0]}`);
+                if (parts[1]) rows.push(`EP  - ${parts[1]}`);
+            }
+            if (item.publisher) rows.push(`PB  - ${clean(item.publisher)}`);
+            rows.push(`DO  - ${doi}`, `UR  - https://doi.org/${doi}`, 'ER  - ');
+            return rows.join('\n');
+        }
+
+        function setStatus(message, type = '') {
+            statusBox.textContent = message;
+            statusBox.className = type ? `status-${type}` : '';
+        }
+
+        function showMetadata(item, doi) {
+            const list = authors(item);
+            const values = [
+                ['标题', first(item.title) || '未提供', true],
+                ['作者', list.map(a => `${a.given} ${a.family}`.trim()).join('; ') || '未提供', true],
+                ['期刊/出版物', first(item['container-title']) || '未提供'],
+                ['出版年份', getYear(item)],
+                ['卷（期）', issueInfo(item) || '未提供'],
+                ['页码/文章号', pageInfo(item) || '未提供'],
+                ['出版机构', clean(item.publisher) || '未提供'],
+                ['文献类型', clean(item.type) || '未提供'],
+                ['DOI', doi, true, `https://doi.org/${doi}`]
+            ];
+            metadataGrid.replaceChildren(...values.map(([label, value, wide, link]) => {
+                const itemBox = document.createElement('div');
+                itemBox.className = `metadata-item${wide ? ' wide' : ''}`;
+                const labelBox = document.createElement('span');
+                labelBox.className = 'metadata-label';
+                labelBox.textContent = label;
+                const valueBox = document.createElement('div');
+                valueBox.className = 'metadata-value';
+                if (link) {
+                    const anchor = document.createElement('a');
+                    anchor.href = link;
+                    anchor.target = '_blank';
+                    anchor.rel = 'noopener noreferrer';
+                    anchor.textContent = value;
+                    valueBox.append(anchor);
+                } else {
+                    valueBox.textContent = value;
+                }
+                itemBox.append(labelBox, valueBox);
+                return itemBox;
+            }));
+            rawJson.textContent = JSON.stringify(item, null, 2);
+            metadataCard.classList.remove('hidden');
+        }
+
+        function showCitations(citations) {
+            citationList.replaceChildren(...Object.entries(citations).map(([key, value]) => {
+                const item = document.createElement('article');
+                item.className = 'citation-item';
+                const head = document.createElement('div');
+                head.className = 'citation-head';
+                const title = document.createElement('span');
+                title.className = 'citation-title';
+                title.textContent = styleNames[key];
+                const copy = document.createElement('button');
+                copy.type = 'button';
+                copy.className = 'btn-secondary btn-small';
+                copy.textContent = '复制';
+                copy.addEventListener('click', () => copyText(value, `${styleNames[key]} 已复制`));
+                const output = document.createElement('pre');
+                output.className = `citation-output${key === 'bibtex' || key === 'ris' ? ' code' : ''}`;
+                output.textContent = value;
+                head.append(title, copy);
+                item.append(head, output);
+                return item;
+            }));
+            resultCard.classList.remove('hidden');
+        }
+
+        async function queryDoi(rawValue) {
+            const doi = normalizeDoi(rawValue);
+            input.value = doi;
+            if (!isValidDoi(doi)) {
+                setStatus('请输入有效 DOI，例如 10.1038/s41586-020-2649-2。', 'error');
+                input.focus();
+                return;
+            }
+
+            queryButton.disabled = true;
+            metadataCard.classList.add('hidden');
+            resultCard.classList.add('hidden');
+            setStatus('正在查询 Crossref 元数据……', 'loading');
+            try {
+                const endpoint = `https://api.crossref.org/works/${encodeURIComponent(doi)}`;
+                const response = await fetch(endpoint, { headers: { Accept: 'application/json' } });
+                if (response.status === 404) throw new Error('Crossref 中没有找到该 DOI。请检查 DOI 是否正确，或该 DOI 是否由其他注册机构管理。');
+                if (!response.ok) throw new Error(`查询失败（HTTP ${response.status}），请稍后重试。`);
+                const payload = await response.json();
+                const item = payload && payload.message;
+                if (!item) throw new Error('接口返回的数据格式不完整。');
+                const citations = buildCitations(item, doi);
+                currentResult = { doi, item, citations };
+                showMetadata(item, doi);
+                showCitations(citations);
+                setStatus('查询成功，引用格式已生成。', 'success');
+                const url = new URL(location.href);
+                url.searchParams.set('doi', doi);
+                history.replaceState(null, '', url);
+            } catch (error) {
+                currentResult = null;
+                setStatus(error.message || '查询失败，请检查网络连接后重试。', 'error');
+            } finally {
+                queryButton.disabled = false;
+            }
+        }
+
+        async function copyText(value, message = '已复制') {
+            try {
+                await navigator.clipboard.writeText(value);
+            } catch {
+                const textarea = document.createElement('textarea');
+                textarea.value = value;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.append(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                textarea.remove();
+            }
+            showToast(message);
+        }
+
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+        }
+
+        function safeFilename(value) {
+            return value.replace(/[^a-z0-9._-]+/gi, '_').slice(0, 80) || 'citation';
+        }
+
+        function download(content, extension, mime) {
+            if (!currentResult) return;
+            const blob = new Blob([content], { type: mime });
+            const anchor = document.createElement('a');
+            anchor.href = URL.createObjectURL(blob);
+            anchor.download = `${safeFilename(currentResult.doi)}.${extension}`;
+            anchor.click();
+            setTimeout(() => URL.revokeObjectURL(anchor.href), 1000);
+        }
+
+        form.addEventListener('submit', event => {
+            event.preventDefault();
+            queryDoi(input.value);
+        });
+
+        document.getElementById('exampleButton').addEventListener('click', () => {
+            input.value = '10.1038/s41586-020-2649-2';
+            queryDoi(input.value);
+        });
+
+        document.getElementById('clearButton').addEventListener('click', () => {
+            input.value = '';
+            currentResult = null;
+            metadataCard.classList.add('hidden');
+            resultCard.classList.add('hidden');
+            setStatus('');
+            const url = new URL(location.href);
+            url.searchParams.delete('doi');
+            history.replaceState(null, '', url);
+            input.focus();
+        });
+
+        document.getElementById('copyAllButton').addEventListener('click', () => {
+            if (!currentResult) return;
+            const content = Object.entries(currentResult.citations)
+                .map(([key, value]) => `${styleNames[key]}\n${value}`)
+                .join('\n\n');
+            copyText(content, '全部引用已复制');
+        });
+
+        document.getElementById('downloadTxtButton').addEventListener('click', () => {
+            if (!currentResult) return;
+            const content = Object.entries(currentResult.citations)
+                .map(([key, value]) => `${styleNames[key]}\n${value}`)
+                .join('\n\n');
+            download(content, 'txt', 'text/plain;charset=utf-8');
+        });
+
+        document.getElementById('downloadBibButton').addEventListener('click', () => {
+            if (currentResult) download(currentResult.citations.bibtex, 'bib', 'application/x-bibtex;charset=utf-8');
+        });
+
+        document.getElementById('downloadRisButton').addEventListener('click', () => {
+            if (currentResult) download(currentResult.citations.ris, 'ris', 'application/x-research-info-systems;charset=utf-8');
+        });
+
+        const doiFromUrl = new URL(location.href).searchParams.get('doi');
+        if (doiFromUrl) {
+            input.value = doiFromUrl;
+            queryDoi(doiFromUrl);
+        }
+    </script>
+</body>
+</html>
