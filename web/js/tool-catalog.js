@@ -15,6 +15,8 @@
         { id: 'line', category: 'text', name: '行号处理', icon: '🔢', description: '批量添加或移除文本行号', type: 'inline' },
         { id: 'sort', category: 'text', name: '文本排序', icon: '↕️', description: '按文本、数字或长度排序', type: 'inline' },
         { id: 'sci', category: 'number', name: '科学计数法', icon: '🔬', description: '普通数字与科学计数法互转', type: 'inline' },
+        { id: 'base-convert', category: 'number', name: '进制转换', icon: '🔢', description: '2–36 进制整数快速互转', type: 'inline' },
+        { id: 'base-calculator', category: 'number', name: '不同进制计算', icon: '➗', description: '不同进制整数的加减乘除和取余', type: 'inline' },
         { id: 'unit', category: 'number', name: '单位换算', icon: '⚖️', description: '常用科研与工程单位换算', type: 'inline' },
         { id: 'random', category: 'number', name: '随机数生成', icon: '🎲', description: '生成可配置的随机数序列', type: 'inline' },
         { id: 'json', category: 'data', name: 'JSON 格式化', icon: '{}', description: '格式化、压缩并校验 JSON', type: 'inline' },

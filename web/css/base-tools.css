@@ -1,0 +1,85 @@
+/* 进制工具专属样式 */
+.base-tool .base-tool-intro {
+    margin: -8px 0 22px;
+    color: var(--text-light);
+}
+
+.base-tool .base-form-grid,
+.base-tool .base-calculator-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 14px;
+    padding: 20px;
+    border-radius: var(--radius);
+    background: #f8fafc;
+}
+
+.base-tool .base-calculator-grid {
+    grid-template-columns: minmax(180px, 2fr) minmax(110px, 1fr) minmax(130px, 1fr);
+}
+
+.base-tool .base-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    font-weight: 600;
+}
+
+.base-tool .base-field-wide {
+    grid-column: 1 / -1;
+}
+
+.base-tool .base-field input,
+.base-tool .base-field select {
+    width: 100%;
+    min-height: 42px;
+    padding: 9px 11px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: #fff;
+    font: 1rem Consolas, "Courier New", monospace;
+}
+
+.base-tool .base-field input:focus,
+.base-tool .base-field select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.base-tool .base-field input[readonly] {
+    color: var(--text);
+    background: #eef2f7;
+    font-size: 1.08rem;
+    font-weight: 700;
+}
+
+.base-tool .base-detail {
+    min-height: 26px;
+    margin-bottom: 14px;
+    color: var(--text-light);
+    overflow-wrap: anywhere;
+}
+
+.base-tool .base-status {
+    min-height: 24px;
+    margin-top: 10px;
+    font-size: 0.9rem;
+}
+
+.base-tool .base-status.error { color: var(--danger); }
+.base-tool .base-status.success { color: var(--success); }
+
+@media (max-width: 768px) {
+    .base-tool .base-form-grid,
+    .base-tool .base-calculator-grid {
+        grid-template-columns: 1fr;
+        padding: 16px;
+    }
+
+    .base-tool .base-field-wide {
+        grid-column: auto;
+    }
+}

@@ -8,6 +8,7 @@
     <meta name="description" content="免费在线科研工具箱：文本处理、数值与单位换算、数据格式化、DOI 引用生成和 CFD 辅助计算。">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/doi-citation.css">
+    <link rel="stylesheet" href="css/base-tools.css">
     <!-- 广告位：顶部 -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4686940386233751" crossorigin="anonymous"></script>
 </head>
@@ -97,6 +98,88 @@
                 <button class="btn-secondary" onclick="copyResult('sci-output')">复制结果</button>
                 <button class="btn-secondary" onclick="clearText('sci')">清空</button>
             </div>
+        </section>
+
+        <!-- 工具: 进制转换 -->
+        <section id="base-convert" class="tool-section base-tool" aria-labelledby="base-convert-title">
+            <h2 id="base-convert-title">🔢 进制转换工具</h2>
+            <p class="base-tool-intro">支持 2–36 进制整数及负数，不需要输入 0x、0b 等前缀。</p>
+            <div class="base-form-grid">
+                <label class="base-field base-field-wide">
+                    <span>输入数值</span>
+                    <input id="base-convert-input" type="text" value="255" autocomplete="off" spellcheck="false">
+                </label>
+                <label class="base-field">
+                    <span>原始进制</span>
+                    <input id="base-convert-from" type="number" min="2" max="36" value="10">
+                </label>
+                <label class="base-field">
+                    <span>目标进制</span>
+                    <input id="base-convert-to" type="number" min="2" max="36" value="16">
+                </label>
+                <label class="base-field base-field-wide">
+                    <span>转换结果</span>
+                    <input id="base-convert-output" type="text" readonly placeholder="结果">
+                </label>
+            </div>
+            <p id="base-convert-detail" class="base-detail">十进制值：</p>
+            <div class="btn-group">
+                <button id="base-convert-run" class="btn-primary" type="button">开始转换</button>
+                <button id="base-convert-swap" class="btn-secondary" type="button">交换进制</button>
+                <button id="base-convert-copy" class="btn-secondary" type="button">复制结果</button>
+                <button id="base-convert-clear" class="btn-secondary" type="button">清空</button>
+            </div>
+            <div id="base-convert-status" class="base-status" role="status" aria-live="polite"></div>
+        </section>
+
+        <!-- 工具: 不同进制整数计算 -->
+        <section id="base-calculator" class="tool-section base-tool" aria-labelledby="base-calculator-title">
+            <h2 id="base-calculator-title">➗ 不同进制整数计算器</h2>
+            <p class="base-tool-intro">两个操作数可以分别指定 2–36 进制；除法返回向零截断的整数商和余数。</p>
+            <div class="base-calculator-grid">
+                <label class="base-field">
+                    <span>操作数 A</span>
+                    <input id="base-calc-left" type="text" value="FF" autocomplete="off" spellcheck="false">
+                </label>
+                <label class="base-field base-field-compact">
+                    <span>A 的进制</span>
+                    <input id="base-calc-left-base" type="number" min="2" max="36" value="16">
+                </label>
+                <label class="base-field base-field-operator">
+                    <span>运算符</span>
+                    <select id="base-calc-operator">
+                        <option value="+">＋ 加</option>
+                        <option value="-">－ 减</option>
+                        <option value="*">× 乘</option>
+                        <option value="/">÷ 除</option>
+                        <option value="%">% 取余</option>
+                    </select>
+                </label>
+                <label class="base-field">
+                    <span>操作数 B</span>
+                    <input id="base-calc-right" type="text" value="1" autocomplete="off" spellcheck="false">
+                </label>
+                <label class="base-field base-field-compact">
+                    <span>B 的进制</span>
+                    <input id="base-calc-right-base" type="number" min="2" max="36" value="2">
+                </label>
+                <label class="base-field base-field-compact">
+                    <span>结果进制</span>
+                    <input id="base-calc-result-base" type="number" min="2" max="36" value="2">
+                </label>
+                <label class="base-field base-field-wide">
+                    <span>计算结果</span>
+                    <input id="base-calc-output" type="text" readonly placeholder="结果">
+                </label>
+            </div>
+            <p id="base-calc-detail" class="base-detail">十进制校验：</p>
+            <div class="btn-group">
+                <button id="base-calc-run" class="btn-primary" type="button">开始计算</button>
+                <button id="base-calc-swap" class="btn-secondary" type="button">交换 A / B</button>
+                <button id="base-calc-copy" class="btn-secondary" type="button">复制结果</button>
+                <button id="base-calc-clear" class="btn-secondary" type="button">清空</button>
+            </div>
+            <div id="base-calc-status" class="base-status" role="status" aria-live="polite"></div>
         </section>
 
         <!-- 工具3: 单位换算 -->
@@ -435,6 +518,7 @@
 
     <script src="js/tool-catalog.js"></script>
     <script src="js/tools.js"></script>
+    <script src="js/base-tools.js"></script>
     <script src="js/doi-citation.js"></script>
 </body>
 </html>
