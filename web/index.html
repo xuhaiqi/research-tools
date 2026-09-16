@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="css/doi-citation.css">
     <link rel="stylesheet" href="css/base-tools.css">
     <link rel="stylesheet" href="css/research-calculators.css">
+    <link rel="stylesheet" href="css/combustion-tools.css">
+    <link rel="stylesheet" href="css/site-dialogs.css">
     <!-- 广告位：顶部 -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4686940386233751" crossorigin="anonymous"></script>
 </head>
@@ -245,6 +247,89 @@
             <div class="btn-group"><button id="error-run" class="btn-primary" type="button">分析误差</button><button id="error-copy" class="btn-secondary" type="button">复制报告</button><button id="error-clear" class="btn-secondary" type="button">清空</button></div>
             <pre id="error-output" class="research-output" aria-live="polite">等待分析…</pre>
             <div id="error-status" class="research-status" role="status"></div>
+        </section>
+
+        <section id="combustion-stoichiometry" class="tool-section combustion-tool" aria-labelledby="combustion-title">
+            <h2 id="combustion-title">🔥 燃烧化学计量与当量比</h2>
+            <p class="combustion-intro">对 CHONS 单一燃料计算理论需氧量、空燃比和贫燃/化学计量理论烟气。富燃时不虚构产物分配。</p>
+            <div class="combustion-grid">
+                <label><span>常用燃料</span><select id="combustion-preset"><option value="CH4">甲烷 CH₄</option><option value="H2">氢气 H₂</option><option value="CO">一氧化碳 CO</option><option value="C2H6">乙烷 C₂H₆</option><option value="C3H8">丙烷 C₃H₈</option><option value="NH3">氨 NH₃</option><option value="CH3OH">甲醇 CH₃OH</option><option value="C2H5OH">乙醇 C₂H₅OH</option></select></label>
+                <label><span>燃料化学式</span><input id="combustion-formula" value="CH4"></label>
+                <label><span>当量比 φ</span><input id="combustion-phi" type="number" step="any" value="1"></label>
+                <label><span>助燃气 O₂（vol%）</span><input id="combustion-air-o2" type="number" step="any" value="20.95"></label>
+            </div>
+            <div class="btn-group"><button id="combustion-run" class="btn-primary" type="button">计算</button><button id="combustion-copy" class="btn-secondary" type="button">复制报告</button></div>
+            <pre id="combustion-output" class="combustion-output">等待计算…</pre><div id="combustion-status" class="combustion-status" role="status"></div>
+        </section>
+
+        <section id="flue-gas-conversion" class="tool-section combustion-tool" aria-labelledby="flue-title">
+            <h2 id="flue-title">💨 烟气干湿基与氧基准换算</h2>
+            <p class="combustion-intro">污染物与 O₂ 必须使用同一输入基准；程序统一换到干基后进行参考氧修正。</p>
+            <div class="combustion-grid">
+                <label><span>污染物浓度</span><input id="flue-concentration" type="number" step="any" value="100"></label>
+                <label><span>浓度单位</span><select id="flue-unit"><option value="ppm">ppm</option><option value="percent">%</option></select></label>
+                <label><span>输入基准</span><select id="flue-basis"><option value="dry">干基 dry</option><option value="wet">湿基 wet</option></select></label>
+                <label><span>水蒸气（vol%）</span><input id="flue-water" type="number" step="any" value="10"></label>
+                <label><span>实测 O₂（vol%，同输入基准）</span><input id="flue-o2" type="number" step="any" value="8"></label>
+                <label><span>目标 O₂（vol%，干基）</span><input id="flue-reference-o2" type="number" step="any" value="6"></label>
+                <label><span>助燃气 O₂（vol%）</span><input id="flue-air-o2" type="number" step="any" value="20.9"></label>
+            </div>
+            <div class="btn-group"><button id="flue-run" class="btn-primary" type="button">换算</button><button id="flue-copy" class="btn-secondary" type="button">复制报告</button></div>
+            <pre id="flue-output" class="combustion-output">等待换算…</pre><div id="flue-status" class="combustion-status" role="status"></div>
+        </section>
+
+        <section id="emission-converter" class="tool-section combustion-tool" aria-labelledby="emission-title">
+            <h2 id="emission-title">🏭 燃烧排放单位换算</h2>
+            <p class="combustion-intro">按理想气体方程进行 ppmv 与 mg/m³ 换算，并可计算质量流率和比排放。</p>
+            <div class="combustion-grid">
+                <label><span>组分/报告基准</span><select id="emission-species"><option data-mw="30.006">NO</option><option data-mw="46.0055" selected>NO₂ / NOx as NO₂</option><option data-mw="28.0101">CO</option><option data-mw="44.0095">CO₂</option><option data-mw="64.066">SO₂</option><option data-mw="17.0305">NH₃</option><option data-mw="16.0425">CH₄</option></select></label>
+                <label><span>分子量（g/mol）</span><input id="emission-mw" type="number" step="any" value="46.0055"></label>
+                <label><span>输入浓度</span><input id="emission-concentration" type="number" step="any" value="100"></label>
+                <label><span>输入单位</span><select id="emission-unit"><option value="ppm">ppmv</option><option value="mg/m3">mg/m³</option></select></label>
+                <label><span>参考温度（°C）</span><input id="emission-temperature" type="number" step="any" value="0"></label>
+                <label><span>绝对压力（kPa）</span><input id="emission-pressure" type="number" step="any" value="101.325"></label>
+                <label><span>体积流量（m³/s，可选）</span><input id="emission-flow" type="number" step="any" value="0"></label>
+                <label><span>设备功率（kW，可选）</span><input id="emission-power" type="number" step="any" value="0"></label>
+            </div>
+            <div class="btn-group"><button id="emission-run" class="btn-primary" type="button">换算</button><button id="emission-copy" class="btn-secondary" type="button">复制报告</button></div>
+            <pre id="emission-output" class="combustion-output">等待换算…</pre><div id="emission-status" class="combustion-status" role="status"></div>
+        </section>
+
+        <section id="fuel-element-analysis" class="tool-section combustion-tool" aria-labelledby="fuel-analysis-title">
+            <h2 id="fuel-analysis-title">🧪 燃料元素分析与经验式</h2>
+            <p class="combustion-intro">换算收到基、干基和干燥无灰基 CHONS，计算 C=1 经验式与理论助燃气量。</p>
+            <div class="combustion-grid">
+                <label><span>元素输入基准</span><select id="fuel-basis"><option value="ar">收到基 ar</option><option value="dry">干基 dry</option><option value="daf">干燥无灰基 daf</option></select></label>
+                <label><span>C（wt%）</span><input id="fuel-c" type="number" step="any" value="45"></label>
+                <label><span>H（wt%）</span><input id="fuel-h" type="number" step="any" value="5"></label>
+                <label><span>O（wt%）</span><input id="fuel-o" type="number" step="any" value="30"></label>
+                <label><span>N（wt%）</span><input id="fuel-n" type="number" step="any" value="1"></label>
+                <label><span>S（wt%）</span><input id="fuel-s" type="number" step="any" value="1"></label>
+                <label><span>水分 ar（wt%）</span><input id="fuel-moisture" type="number" step="any" value="10"></label>
+                <label><span>灰分（wt%）</span><input id="fuel-ash" type="number" step="any" value="8"></label>
+                <label><span>助燃气 O₂（vol%）</span><input id="fuel-air-o2" type="number" step="any" value="20.95"></label>
+            </div>
+            <p class="combustion-note">水分始终按收到基；daf 输入时灰分也按收到基，其余情况下灰分随所选基准。</p>
+            <div class="btn-group"><button id="fuel-run" class="btn-primary" type="button">计算</button><button id="fuel-copy" class="btn-secondary" type="button">复制报告</button></div>
+            <pre id="fuel-output" class="combustion-output">等待计算…</pre><div id="fuel-status" class="combustion-status" role="status"></div>
+        </section>
+
+        <section id="heating-value" class="tool-section combustion-tool" aria-labelledby="heating-title">
+            <h2 id="heating-title">⚡ 高低位热值与能量流</h2>
+            <p class="combustion-intro">实测 HHV 优先；留空时才使用明确标注的 Dulong 经验估算。</p>
+            <div class="combustion-grid">
+                <label><span>C dry（wt%）</span><input id="heating-c" type="number" step="any" value="80"></label>
+                <label><span>H dry（wt%）</span><input id="heating-h" type="number" step="any" value="5"></label>
+                <label><span>O dry（wt%）</span><input id="heating-o" type="number" step="any" value="10"></label>
+                <label><span>S dry（wt%）</span><input id="heating-s" type="number" step="any" value="1"></label>
+                <label><span>水分 ar（wt%）</span><input id="heating-moisture" type="number" step="any" value="10"></label>
+                <label><span>实测 HHV（MJ/kg，可留空）</span><input id="heating-hhv" type="number" step="any" placeholder="留空则经验估算"></label>
+                <label><span>实测 HHV 基准</span><select id="heating-basis"><option value="dry">干基 dry</option><option value="ar">收到基 ar</option></select></label>
+                <label><span>水汽化潜热（MJ/kg）</span><input id="heating-hfg" type="number" step="any" value="2.442"></label>
+                <label><span>燃料流量（kg/h，可选）</span><input id="heating-flow" type="number" step="any" value="0"></label>
+            </div>
+            <div class="btn-group"><button id="heating-run" class="btn-primary" type="button">计算</button><button id="heating-copy" class="btn-secondary" type="button">复制报告</button></div>
+            <pre id="heating-output" class="combustion-output">等待计算…</pre><div id="heating-status" class="combustion-status" role="status"></div>
         </section>
 
         <!-- 工具3: 单位换算 -->
@@ -575,16 +660,68 @@
             <p>© 2025 科研工具集 | 让科研更高效</p>
             <p class="footer-links">
                 <a href="https://github.com/xuhaiqi/research-tools" target="_blank" rel="noopener noreferrer">GitHub</a> | 
-                <a href="#">使用帮助</a> | 
-                <a href="#">反馈建议</a>
+                <button id="help-open" class="footer-link" type="button">使用帮助</button> |
+                <button id="feedback-open" class="footer-link" type="button">问题反馈</button>
             </p>
         </div>
     </footer>
+
+    <dialog id="update-dialog" class="site-dialog" aria-labelledby="update-dialog-title">
+        <div class="site-dialog-header update-header">
+            <div><span class="dialog-kicker">LATEST UPDATE · 2026.09</span><h2 id="update-dialog-title">🔥 化学与燃烧工具上线</h2></div>
+            <button class="dialog-close" type="button" data-close-dialog="update-dialog" aria-label="关闭更新公告">×</button>
+        </div>
+        <div class="site-dialog-body">
+            <p>本次新增 5 个面向燃烧实验与数据处理的科研工具：</p>
+            <ul class="update-list">
+                <li><strong>燃烧化学计量</strong><span>需氧量、空燃比、当量比与理论烟气</span></li>
+                <li><strong>烟气基准换算</strong><span>湿基、干基和参考氧修正</span></li>
+                <li><strong>排放单位换算</strong><span>ppmv、mg/m³、质量流率和 g/kWh</span></li>
+                <li><strong>燃料元素分析</strong><span>ar、dry、daf、经验式和助燃气量</span></li>
+                <li><strong>高低位热值</strong><span>HHV、LHV、含水修正和热输入</span></li>
+            </ul>
+            <p class="dialog-note">计算模型、适用范围和限制已写入项目文档。法规报告仍应以适用标准规定为准。</p>
+        </div>
+        <div class="site-dialog-actions"><button class="btn-primary" type="button" data-close-dialog="update-dialog">开始使用</button><button id="update-help-open" class="btn-secondary" type="button">查看使用帮助</button></div>
+    </dialog>
+
+    <dialog id="help-dialog" class="site-dialog site-dialog-wide" aria-labelledby="help-dialog-title">
+        <div class="site-dialog-header"><div><span class="dialog-kicker">HELP CENTER</span><h2 id="help-dialog-title">使用帮助</h2></div><button class="dialog-close" type="button" data-close-dialog="help-dialog" aria-label="关闭使用帮助">×</button></div>
+        <div class="site-dialog-body help-content">
+            <section><h3>如何使用工具</h3><ol><li>在顶部选择工具大类，再点击具体工具卡片。</li><li>按照字段标注输入数据，注意单位、干湿基和参考状态。</li><li>点击计算或转换，并使用“复制报告”保存结果。</li><li>重要科研结果请结合原始数据、模型假设和适用标准复核。</li></ol></section>
+            <section><h3>数据与隐私</h3><p>除 DOI 工具需要调用 Crossref 查询公开文献元数据外，数值、统计、化学和燃烧工具均在浏览器本地计算，输入数据不会上传到本站服务器。</p></section>
+            <section><h3>常见问题</h3><details><summary>为什么网页和文献中的结果略有差异？</summary><p>请先核对原子量、温压、标况定义、干湿基、参考氧、热值基准及舍入位数。模型假设不同也会造成差异。</p></details><details><summary>可以离线使用吗？</summary><p>GitHub 仓库根目录提供 Windows EXE。网页版也可以保存到本地，但涉及网络接口的 DOI 查询离线时不可用。</p></details><details><summary>计算结果可以直接用于论文或法规报告吗？</summary><p>工具适合快速计算和交叉检查。论文应记录输入、公式和假设；法规报告必须采用适用标准指定的方法和基准。</p></details></section>
+            <section><h3>仍然遇到问题？</h3><p>请关闭帮助窗口后点击页脚“问题反馈”，附上工具名称、输入数据、预期结果和实际结果。</p></section>
+        </div>
+        <div class="site-dialog-actions"><button class="btn-primary" type="button" data-close-dialog="help-dialog">知道了</button></div>
+    </dialog>
+
+    <dialog id="feedback-dialog" class="site-dialog site-dialog-wide" aria-labelledby="feedback-dialog-title">
+        <div class="site-dialog-header"><div><span class="dialog-kicker">FEEDBACK</span><h2 id="feedback-dialog-title">问题反馈</h2></div><button class="dialog-close" type="button" data-close-dialog="feedback-dialog" aria-label="关闭问题反馈">×</button></div>
+        <div class="site-dialog-body">
+            <form id="feedback-form" class="feedback-form">
+                <label><span>问题类型</span><select id="feedback-type"><option>计算结果问题</option><option>页面或交互问题</option><option>功能建议</option><option>其他问题</option></select></label>
+                <label><span>涉及工具</span><input id="feedback-tool" type="text" placeholder="例如：烟气干湿基与氧基准换算器"></label>
+                <label><span>问题标题 <em>必填</em></span><input id="feedback-title" type="text" maxlength="120" required placeholder="用一句话概括问题"></label>
+                <label><span>问题描述 <em>必填</em></span><textarea id="feedback-description" rows="5" maxlength="3000" required placeholder="请说明输入数据、操作步骤、实际结果和预期结果。请勿填写密码、密钥等敏感信息。"></textarea></label>
+                <label><span>复现环境</span><input id="feedback-environment" type="text" placeholder="例如：Chrome / Windows 11 / 网页版"></label>
+                <button class="btn-primary" type="submit">生成反馈内容</button>
+            </form>
+            <div id="feedback-result" class="feedback-result hidden">
+                <h3>反馈预览</h3><pre id="feedback-preview"></pre>
+                <p class="dialog-note">点击 GitHub 后会打开新页面，最终提交前仍可编辑；本站不会自动发送反馈。</p>
+                <div class="feedback-actions"><button id="feedback-copy" class="btn-secondary" type="button">复制反馈</button><a id="feedback-github" class="btn-primary button-link" href="https://github.com/xuhaiqi/research-tools/issues/new" target="_blank" rel="noopener noreferrer">前往 GitHub 提交</a></div>
+            </div>
+            <div id="feedback-status" class="dialog-status" role="status" aria-live="polite"></div>
+        </div>
+    </dialog>
 
     <script src="js/tool-catalog.js"></script>
     <script src="js/tools.js"></script>
     <script src="js/base-tools.js"></script>
     <script src="js/research-calculators.js"></script>
+    <script src="js/combustion-tools.js"></script>
+    <script src="js/site-dialogs.js"></script>
     <script src="js/doi-citation.js"></script>
 </body>
 </html>
