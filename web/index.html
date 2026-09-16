@@ -5,10 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>科研工具集 - 研究生/博士生必备工具箱</title>
-    <meta name="description" content="免费在线科研工具箱：文本处理、数值与单位换算、数据格式化、DOI 引用生成和 CFD 辅助计算。">
+    <meta name="description" content="免费在线科研工具箱：文本处理、统计分析、线性回归、科学计算、误差分析、DOI 引用生成和 CFD 辅助计算。">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/doi-citation.css">
     <link rel="stylesheet" href="css/base-tools.css">
+    <link rel="stylesheet" href="css/research-calculators.css">
     <!-- 广告位：顶部 -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4686940386233751" crossorigin="anonymous"></script>
 </head>
@@ -180,6 +181,70 @@
                 <button id="base-calc-clear" class="btn-secondary" type="button">清空</button>
             </div>
             <div id="base-calc-status" class="base-status" role="status" aria-live="polite"></div>
+        </section>
+
+        <!-- 工具: 统计计算器 -->
+        <section id="statistics" class="tool-section research-tool" aria-labelledby="statistics-title">
+            <h2 id="statistics-title">📊 统计计算器</h2>
+            <p class="research-intro">粘贴一组数字，快速获得样本量、均值、中位数、极值、四分位数、方差和标准差。</p>
+            <label class="research-field"><span>数据（支持空格、逗号、分号或换行）</span><textarea id="statistics-input" rows="6">1, 2, 3, 4, 5</textarea></label>
+            <label class="research-check"><input id="statistics-sample" type="checkbox" checked> 使用样本方差和样本标准差（n−1）</label>
+            <div class="btn-group"><button id="statistics-run" class="btn-primary" type="button">开始计算</button><button id="statistics-copy" class="btn-secondary" type="button">复制报告</button><button id="statistics-clear" class="btn-secondary" type="button">清空</button></div>
+            <pre id="statistics-output" class="research-output" aria-live="polite">等待计算…</pre>
+            <div id="statistics-status" class="research-status" role="status"></div>
+        </section>
+
+        <!-- 工具: 线性拟合与回归 -->
+        <section id="linear-regression" class="tool-section research-tool" aria-labelledby="regression-title">
+            <h2 id="regression-title">📈 线性拟合与回归</h2>
+            <p class="research-intro">输入成对 X、Y 数据，计算最小二乘直线、相关系数和决定系数，并绘制散点图。</p>
+            <div class="research-two-column">
+                <label class="research-field"><span>X 数据</span><textarea id="regression-x" rows="6">1, 2, 3, 4, 5</textarea></label>
+                <label class="research-field"><span>Y 数据</span><textarea id="regression-y" rows="6">2.1, 4.0, 6.2, 7.9, 10.1</textarea></label>
+            </div>
+            <div class="btn-group"><button id="regression-run" class="btn-primary" type="button">开始拟合</button><button id="regression-copy" class="btn-secondary" type="button">复制结果</button><button id="regression-clear" class="btn-secondary" type="button">清空</button></div>
+            <pre id="regression-output" class="research-output" aria-live="polite">等待拟合…</pre>
+            <canvas id="regression-chart" class="research-chart" width="900" height="420" aria-label="线性拟合图"></canvas>
+            <div id="regression-status" class="research-status" role="status"></div>
+        </section>
+
+        <!-- 工具: 科学表达式计算 -->
+        <section id="expression-calculator" class="tool-section research-tool" aria-labelledby="expression-title">
+            <h2 id="expression-title">🧮 科学表达式计算器</h2>
+            <p class="research-intro">支持 + − × ÷、括号、幂以及常见数学函数；角度制可用于三角函数。</p>
+            <label class="research-field"><span>表达式</span><input id="expression-input" type="text" value="sqrt(2)^2 + sin(30)" autocomplete="off"></label>
+            <label class="research-check"><input id="expression-degrees" type="checkbox" checked> 三角函数使用角度制</label>
+            <p class="research-help">函数：sqrt、sin、cos、tan、asin、acos、atan、log、ln、exp、abs；常量：pi、e。</p>
+            <div class="btn-group"><button id="expression-run" class="btn-primary" type="button">计算</button><button id="expression-copy" class="btn-secondary" type="button">复制结果</button><button id="expression-clear" class="btn-secondary" type="button">清空</button></div>
+            <pre id="expression-output" class="research-output" aria-live="polite">等待计算…</pre>
+            <div id="expression-status" class="research-status" role="status"></div>
+        </section>
+
+        <!-- 工具: 有效数字与修约 -->
+        <section id="significant-figures" class="tool-section research-tool" aria-labelledby="significant-title">
+            <h2 id="significant-title">🎯 有效数字与数值修约</h2>
+            <p class="research-intro">按有效数字或小数位批量修约，采用科研常用的四舍六入五成双规则。</p>
+            <label class="research-field"><span>数值（每行或使用逗号分隔）</span><textarea id="significant-input" rows="6">1.245, 12.55, 0.00123456</textarea></label>
+            <div class="research-two-column compact">
+                <label class="research-field"><span>修约方式</span><select id="significant-mode"><option value="significant">有效数字</option><option value="decimal">小数位数</option></select></label>
+                <label class="research-field"><span>保留位数</span><input id="significant-places" type="number" min="0" max="15" value="3"></label>
+            </div>
+            <div class="btn-group"><button id="significant-run" class="btn-primary" type="button">开始修约</button><button id="significant-copy" class="btn-secondary" type="button">复制结果</button><button id="significant-clear" class="btn-secondary" type="button">清空</button></div>
+            <pre id="significant-output" class="research-output" aria-live="polite">等待修约…</pre>
+            <div id="significant-status" class="research-status" role="status"></div>
+        </section>
+
+        <!-- 工具: 误差分析 -->
+        <section id="error-analysis" class="tool-section research-tool" aria-labelledby="error-title">
+            <h2 id="error-title">📐 误差分析工具</h2>
+            <p class="research-intro">比较测量值与参考值，计算逐点误差以及 MAE、RMSE、平均偏差和 MAPE。</p>
+            <div class="research-two-column">
+                <label class="research-field"><span>测量值 / 预测值</span><textarea id="error-observed" rows="6">9.8, 20.5, 29.7, 41.0</textarea></label>
+                <label class="research-field"><span>参考值 / 真实值</span><textarea id="error-reference" rows="6">10, 20, 30, 40</textarea></label>
+            </div>
+            <div class="btn-group"><button id="error-run" class="btn-primary" type="button">分析误差</button><button id="error-copy" class="btn-secondary" type="button">复制报告</button><button id="error-clear" class="btn-secondary" type="button">清空</button></div>
+            <pre id="error-output" class="research-output" aria-live="polite">等待分析…</pre>
+            <div id="error-status" class="research-status" role="status"></div>
         </section>
 
         <!-- 工具3: 单位换算 -->
@@ -519,6 +584,7 @@
     <script src="js/tool-catalog.js"></script>
     <script src="js/tools.js"></script>
     <script src="js/base-tools.js"></script>
+    <script src="js/research-calculators.js"></script>
     <script src="js/doi-citation.js"></script>
 </body>
 </html>
