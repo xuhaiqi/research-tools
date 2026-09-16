@@ -1,0 +1,12 @@
+/* 化学与燃烧工具 */
+.combustion-tool .combustion-intro { margin: -8px 0 18px; color: var(--text-light); }
+.combustion-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 18px; margin-bottom: 16px; padding: 18px; border-radius: var(--radius); background: #f8fafc; }
+.combustion-grid label { display: flex; flex-direction: column; gap: 6px; min-width: 0; font-weight: 600; }
+.combustion-grid input, .combustion-grid select { width: 100%; min-height: 42px; padding: 9px 11px; border: 1px solid var(--border); border-radius: var(--radius); background: #fff; color: var(--text); font: 1rem Consolas, "Microsoft YaHei", monospace; }
+.combustion-grid input:focus, .combustion-grid select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+.combustion-output { min-height: 130px; margin-top: 16px; padding: 16px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; border: 1px solid var(--border); border-left: 4px solid #ea580c; border-radius: var(--radius); background: #fff7ed; color: var(--text); font: .94rem/1.65 Consolas, "Microsoft YaHei", monospace; }
+.combustion-note { margin: -4px 0 14px; color: var(--text-light); font-size: .9rem; }
+.combustion-status { min-height: 24px; margin-top: 8px; font-size: .9rem; }
+.combustion-status.error { color: var(--danger); }
+.combustion-status.success { color: var(--success); }
+@media (max-width: 768px) { .combustion-grid { grid-template-columns: 1fr; padding: 14px; } }
