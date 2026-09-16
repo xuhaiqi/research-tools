@@ -4,6 +4,7 @@
         { id: 'text', name: '文本与语言', icon: '📝', description: '文本清理、转换、统计与排序' },
         { id: 'number', name: '数值与单位', icon: '🔢', description: '数值表示、单位换算与随机数据' },
         { id: 'data', name: '数据与格式', icon: '🗂️', description: '结构化数据的格式化与校验' },
+        { id: 'chemistry', name: '化学与燃烧', icon: '🔥', description: '燃烧计量、烟气、排放与燃料性质' },
         { id: 'literature', name: '学术与文献', icon: '📚', description: '论文元数据与参考文献处理' },
         { id: 'engineering', name: '工程与仿真', icon: '🧮', description: '空气动力学与数值仿真辅助计算' }
     ];
@@ -25,6 +26,11 @@
         { id: 'statistics', category: 'data', name: '统计计算器', icon: '📊', description: '均值、分位数、方差和标准差', type: 'inline' },
         { id: 'linear-regression', category: 'data', name: '线性拟合与回归', icon: '📈', description: '最小二乘直线、相关系数和拟合图', type: 'inline' },
         { id: 'error-analysis', category: 'data', name: '误差分析', icon: '📐', description: 'MAE、RMSE、偏差和相对误差', type: 'inline' },
+        { id: 'combustion-stoichiometry', category: 'chemistry', name: '燃烧化学计量', icon: '🔥', description: '理论需氧量、空燃比、当量比和烟气', type: 'inline' },
+        { id: 'flue-gas-conversion', category: 'chemistry', name: '烟气基准换算', icon: '💨', description: '干湿基与参考氧含量修正', type: 'inline' },
+        { id: 'emission-converter', category: 'chemistry', name: '排放单位换算', icon: '🏭', description: 'ppmv、mg/m³、质量流率和比排放', type: 'inline' },
+        { id: 'fuel-element-analysis', category: 'chemistry', name: '燃料元素分析', icon: '🧪', description: '分析基准、经验式和理论助燃气量', type: 'inline' },
+        { id: 'heating-value', category: 'chemistry', name: '高低位热值', icon: '⚡', description: 'HHV、LHV、含水修正和热输入', type: 'inline' },
         { id: 'doi-citation', category: 'literature', name: 'DOI 引用生成器', icon: '📚', description: '查询 Crossref 并生成常用引用格式', type: 'inline' },
         { id: 'cfd', category: 'engineering', name: 'CFD 参数计算', icon: '🧮', description: '标准大气、y+、边界层和雷诺数计算', type: 'page', target: 'cfd.html' }
     ];
