@@ -17,9 +17,14 @@
         { id: 'sci', category: 'number', name: '科学计数法', icon: '🔬', description: '普通数字与科学计数法互转', type: 'inline' },
         { id: 'base-convert', category: 'number', name: '进制转换', icon: '🔢', description: '2–36 进制整数快速互转', type: 'inline' },
         { id: 'base-calculator', category: 'number', name: '不同进制计算', icon: '➗', description: '不同进制整数的加减乘除和取余', type: 'inline' },
+        { id: 'expression-calculator', category: 'number', name: '科学表达式计算', icon: '🧮', description: '安全计算函数、常量、括号和幂运算', type: 'inline' },
+        { id: 'significant-figures', category: 'number', name: '有效数字与修约', icon: '🎯', description: '按有效数字或小数位批量修约', type: 'inline' },
         { id: 'unit', category: 'number', name: '单位换算', icon: '⚖️', description: '常用科研与工程单位换算', type: 'inline' },
         { id: 'random', category: 'number', name: '随机数生成', icon: '🎲', description: '生成可配置的随机数序列', type: 'inline' },
         { id: 'json', category: 'data', name: 'JSON 格式化', icon: '{}', description: '格式化、压缩并校验 JSON', type: 'inline' },
+        { id: 'statistics', category: 'data', name: '统计计算器', icon: '📊', description: '均值、分位数、方差和标准差', type: 'inline' },
+        { id: 'linear-regression', category: 'data', name: '线性拟合与回归', icon: '📈', description: '最小二乘直线、相关系数和拟合图', type: 'inline' },
+        { id: 'error-analysis', category: 'data', name: '误差分析', icon: '📐', description: 'MAE、RMSE、偏差和相对误差', type: 'inline' },
         { id: 'doi-citation', category: 'literature', name: 'DOI 引用生成器', icon: '📚', description: '查询 Crossref 并生成常用引用格式', type: 'inline' },
         { id: 'cfd', category: 'engineering', name: 'CFD 参数计算', icon: '🧮', description: '标准大气、y+、边界层和雷诺数计算', type: 'page', target: 'cfd.html' }
     ];
